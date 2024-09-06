@@ -21,6 +21,7 @@
     "typescript": "^5.5.4"
   },
   "dependencies": {
+    "@effect/data": "^0.18.7",
     "@effect/typeclass": "^0.26.2",
     "effect": "^3.7.2"
   }
