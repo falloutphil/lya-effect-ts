@@ -1,0 +1,27 @@
+{
+  "name": "lya-effect-ts",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/falloutphil/lya-effect-ts.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/falloutphil/lya-effect-ts/issues"
+  },
+  "homepage": "https://github.com/falloutphil/lya-effect-ts#readme",
+  "devDependencies": {
+    "typescript": "^5.5.4"
+  },
+  "dependencies": {
+    "@effect/typeclass": "^0.26.2",
+    "effect": "^3.7.2"
+  }
+}
