@@ -1,27 +1,12 @@
-import * as O from "@effect/data/Option";
-import { Covariant } from "@effect/typeclass";
-import { pipe } from "@effect/data/Function";
+import { Covariant } from "@effect/typeclass/Covariant";
+import type { Kind, TypeLambda } from "effect/HKT";
 
-// Define the TypeLambda for Option
-interface OptionTypeLambda extends O.TypeLambda {
-  readonly type: O.Option<this["Target"]>;
-}
-
-// Define the Covariant instance for Option
-const optionCovariant: Covariant<OptionTypeLambda> = {
-  map: (fa, f) => O.map(fa, f),
-};
-
-// Define the increment function using Covariant
-function increment<F extends Covariant<any>>(
+// Define the increment function
+function increment<F extends TypeLambda>(
   covariant: Covariant<F>,
-  fa: F<number>
-): F<number> {
+  fa: Kind<F, unknown, unknown, unknown, number>
+): Kind<F, unknown, unknown, unknown, number> {
+  // Use the covariant's map method to add 1 to each element inside the functor
   return covariant.map(fa, (x) => x + 1);
 }
 
-// Example usage with Option
-const someValue: O.Option<number> = O.some(5);
-const incremented = increment(optionCovariant, someValue);
-
-console.log(incremented); // Output: Some(6)
