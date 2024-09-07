@@ -1,3 +1,5 @@
+// -*- compile-command: "npx ts-node optional-effect.ts" -*-
+
 import { Covariant as OptionCovariant } from "@effect/typeclass/data/Option";
 import { some } from "effect/Option";
 import type { Covariant } from "@effect/typeclass/Covariant";

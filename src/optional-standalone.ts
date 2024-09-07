@@ -1,3 +1,5 @@
+// -*- compile-command: "npx ts-node optional-standaqlone.ts" -*-
+
 // This version works with no effect-ts code at all!
 // It shows the mechanics from first principles and is based on fp-ts not effect-ts
 
