@@ -1,7 +1,7 @@
 // -*- compile-command: "npx ts-node optional-effect.ts" -*-
 
-import { Covariant as OptionCovariant } from "@effect/typeclass/data/Option";
-import { Covariant as ArrayCovariant } from "@effect/typeclass/data/Array";
+import * as O from "@effect/typeclass/data/Option";
+import * as A from "@effect/typeclass/data/Array";
 import { some } from "effect/Option";
 import type { Covariant } from "@effect/typeclass/Covariant";
 import type { Kind, TypeLambda } from "effect/HKT";
@@ -16,9 +16,10 @@ function increment<F extends TypeLambda>(
 
 // Use the Option-specific Covariant instance
 const someValue = some(5);
-const incremented = increment(OptionCovariant, someValue);
+const incremented = increment(O.Covariant, someValue);
 console.log(incremented); // Output: Some(6)
 
-const arrayValue = [1,2,3,4]
-const arrayIncremented = increment(ArrayCovariant, arrayValue)
-console.log(arrayIncremented); // [2,3,4,5]
+// Use the Array-specific Covariant instance
+const arrayValue = [1, 2, 3, 4];
+const arrayIncremented = increment(A.Covariant, arrayValue);
+console.log(arrayIncremented); // Output: [2, 3, 4, 5]
