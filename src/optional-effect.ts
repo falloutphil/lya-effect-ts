@@ -6,8 +6,8 @@ import { some, none } from "effect/Option";
 import type { Covariant } from "@effect/typeclass/Covariant";
 import type { Kind, TypeLambda } from "effect/HKT";
 
-import { SemiApplicative, getSemigroup } from "@effect/typeclass/SemiApplicative";
-import { Semigroup } from "@effect/typeclass/Semigroup";
+import { getSemigroup } from "@effect/typeclass/SemiApplicative";
+import { SemigroupSum } from "@effect/typeclass/data/Number";
 
 // Generic increment function using the generic Covariant interface
 function increment<F extends TypeLambda>(
@@ -48,13 +48,6 @@ console.log(liftedArray); // Output: [2, 4, 6, 8]
 const liftedNone = lift(O.Covariant, none(), (x: number) => x + 5);
 console.log(liftedNone); // Output: None
 
-
-
-// Define a Semigroup for numbers that uses addition
-const SemigroupSum: Semigroup<number> = {
-  combine: (x, y) => x + y,
-  combineMany: (first, others) => Array.from(others).reduce((acc: number, n: number) => acc + n, first)
-};
 
 // Lift the Semigroup into the Option context using SemiApplicative's getSemigroup
 const optionSemigroup = getSemigroup(O.SemiApplicative)(SemigroupSum);
