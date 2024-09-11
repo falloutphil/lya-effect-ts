@@ -2,7 +2,6 @@
 
 import { pipe } from "effect/Function"; // Importing the pipe function for functional composition
 import * as Option from "effect/Option"; // Importing Option type and utility functions
-import * as O from "@effect/typeclass/data/Option"; // Importing typeclass instances for Option
 import { getMonoid as getArrayMonoid } from "@effect/typeclass/data/Array"; // Importing array-specific Monoid instance
 import { getOptionalMonoid } from "@effect/typeclass/data/Option"; // Importing the function to create Monoid for Option
 
