@@ -1,6 +1,6 @@
 // -*- compile-command: "npx ts-node monoid-flatten-array.ts" -*-
 
-import { pipe } from "effect/Function"; // Importing the pipe function for function composition
+import { pipe } from "effect/Function";
 import { getMonoid } from "@effect/typeclass/data/Array"; // Importing array-specific Monoid instance
 
 // Flatten an array of arrays using the array Monoid
@@ -8,6 +8,11 @@ import { getMonoid } from "@effect/typeclass/data/Array"; // Importing array-spe
 function flattened<A>(array: ReadonlyArray<ReadonlyArray<A>>): ReadonlyArray<A> {
   // Use pipe to pass the array through combineAll with the array monoid
   // The Monoid instance for arrays knows how to concatenate them, with the empty array as the identity
+  // The important point here is that getMonoid comes from Array's typeclass NOT A's typeclass
+  // So it produces a monoid to combine **Arrays** containing elements of type A, rather than combining
+  // elements of type A.
+  // It's nice because Typescripts type system is good enough so you can simply pass it the
+  // it the array of arrays without having to explicitly says what A is (see below)
   return pipe(array, getMonoid<A>().combineAll);
 }
 
