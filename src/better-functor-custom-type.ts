@@ -2,7 +2,6 @@
 
 import { dual } from "effect/Function";
 import * as A from "@effect/typeclass/data/Array"; // Importing Covariant instance for arrays
-import * as Covariant from "@effect/typeclass/Covariant"; // Importing Covariant (equivalent to Functor)
 import type { Covariant as CovariantType } from "@effect/typeclass/Covariant";
 import type { Kind, TypeLambda } from "effect/HKT";
 
