@@ -61,7 +61,7 @@ console.log(liftedNone); // Output: None
 // which is a common alternative to using map in certain contexts.
 
 // getSemigroup leverages O.SemiApplicative to create a semigroup for Option<number>
-// by lifting the semigroup operation of number (SemigroupSum) into the Option context.
+// by lifting the semigroup operation of Number (SemigroupSum) into the Option context.
 // Essentially, it combines the capabilities of O.SemiApplicative and SemigroupSum to define how
 // Some values are combined (+ via SemigroupSum) and how None values are managed
 // (i.e., None short-circuits the operation).
@@ -71,7 +71,7 @@ const optionSemigroup = SA.getSemigroup(O.SemiApplicative)(N.SemigroupSum);
 // This semigroup allows us to combine two Option values where both need to be Some for a result
 const combined = optionSemigroup.combine(Option.some(2), Option.some(3)); // Some(5)
 // If either is None, the result is None
-const combinedWithNone = optionSemigroup.combine(Option.some(2), Option.none<number>()); // None
+const combinedWithNone = optionSemigroup.combine(Option.some(2), Option.none()); // None
 
 console.log(combined); // Output: Some(5)
 console.log(combinedWithNone); // Output: None
