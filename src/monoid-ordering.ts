@@ -3,6 +3,15 @@
 import { combineAll, Ordering } from "effect/Ordering"; // Importing combineAll for combining orderings
 import * as Ord from "effect/Order"; // Importing all Order instances and utilities from Order module
 
+// Order is a monoid which you can think of as comparing
+// until we get a definitive LT or GT.  If the two things
+// being compared are EQ then we move to the next comparison
+// until we find a LT or GT result.
+
+// Here strings are normally compared lexicographically,
+// but we can compare by length, number of vowels, and only
+// then fall back back to a lexical comparison.
+
 // lengthCompare :: String -> String -> Ordering
 // lengthCompare x y = (length x `compare` length y) `mappend`
 //                     (vowels x `compare` vowels y) `mappend`
