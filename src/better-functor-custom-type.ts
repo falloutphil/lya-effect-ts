@@ -30,8 +30,10 @@ const CovariantX: CovariantType<XTypeLambda> = {
 // Curried map function for any Covariant
 function curriedMap<F extends TypeLambda>(
   covariant: CovariantType<F>
-): <A, B>(f: (a: A) => B) => (fa: Kind<F, unknown, unknown, unknown, A>) => Kind<F, unknown, unknown, unknown, B> {
-  return <A, B>(f: (a: A) => B) => (fa: Kind<F, unknown, unknown, unknown, A>) => covariant.map(fa, f);
+) {
+  return <A, B>(f: (a: A) => B) =>
+    (fa: Kind<F, unknown, unknown, unknown, A>) =>
+    covariant.map(fa, f);
 }
 
 // Define the doubleAndBang function using the curried map
