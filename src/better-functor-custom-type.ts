@@ -5,17 +5,18 @@ import * as A from "@effect/typeclass/data/Array"; // Importing Covariant instan
 import type { Covariant as CovariantType } from "@effect/typeclass/Covariant";
 import type { Kind, TypeLambda } from "effect/HKT";
 
-// Define the custom type X
+// Define the custom HKT X
 type X<A> = {
   x: A;
 };
 
-// Define the URI for X
+// A TypeLambda represents X as an HKT. By extending TypeLambda, XTypeLambda defines
+// how X fits into the HKT structure (which defined "Target" etc).
 interface XTypeLambda extends TypeLambda {
   readonly type: X<this["Target"]>;
 }
 
-// Define the Covariant (Functor) instance for X
+// Define the Covariant (Functor) instance for X's HKT.
 // dual allows us to use it both as a regular function
 // and a curried function - dual(arity, func)
 const CovariantX: CovariantType<XTypeLambda> = {
@@ -25,11 +26,14 @@ const CovariantX: CovariantType<XTypeLambda> = {
   ),
   imap: dual(
     3,
-    (fa, to, _from) => ({ x: to(fa.x) }) // NOTE: We only demonstrate one direction A->B , from() is not used for B->A
+    (fa, to, _from) => ({ x: to(fa.x) }) // NOTE: We only demonstrate one direction A->B, from() is not used for B->A
   )
 };
 
 // Define the doubleAndBang function using map directly
+// F must be an HKT (TypeLambda), and also a CovariantType (Functor).
+// fa is a kind of HKT F, containing number(s).
+// It returns an HKT F, containing string(s).
 function doubleAndBang<F extends TypeLambda>(
   covariant: CovariantType<F>,
   fa: Kind<F, unknown, unknown, unknown, number>
