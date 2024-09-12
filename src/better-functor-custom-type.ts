@@ -1,6 +1,6 @@
 // -*- compile-command: "npx ts-node better-functor-custom-type.ts" -*-
 
-import { dual } from "effect/Function";
+import { dual, pipe } from "effect/Function";
 import * as A from "@effect/typeclass/data/Array"; // Importing Covariant instance for arrays
 import type { Covariant as CovariantType } from "@effect/typeclass/Covariant";
 import type { Kind, TypeLambda } from "effect/HKT";
@@ -15,34 +15,29 @@ interface XTypeLambda extends TypeLambda {
   readonly type: X<this["Target"]>;
 }
 
-// Define the Covariant (Functor) instance for X using the correct signature for imap
+// Define the Covariant (Functor) instance for X
+// dual allows us to use it both as a regular function
+// and a curried function - dual(arity, func)
 const CovariantX: CovariantType<XTypeLambda> = {
   map: dual(
     2,
-    <A, B>(fa: X<A>, f: (a: A) => B): X<B> => ({ x: f(fa.x) })
+    (fa, f) => ({ x: f(fa.x) })
   ),
   imap: dual(
     3,
-    <A, B>(fa: X<A>, to: (a: A) => B, _from: (b: B) => A): X<B> => ({ x: to(fa.x) })
+    (fa, to, _from) => ({ x: to(fa.x) })
   )
 };
 
-// Curried map function for any Covariant
-function curriedMap<F extends TypeLambda>(
-  covariant: CovariantType<F>
-) {
-  return <A, B>(f: (a: A) => B) =>
-    (fa: Kind<F, unknown, unknown, unknown, A>) =>
-    covariant.map(fa, f);
-}
-
-// Define the doubleAndBang function using the curried map
+// Define the doubleAndBang function using map directly
 function doubleAndBang<F extends TypeLambda>(
   covariant: CovariantType<F>,
   fa: Kind<F, unknown, unknown, unknown, number>
-): Kind<F, unknown, unknown, unknown, string> {
-  const myMap = curriedMap(covariant);
-  return myMap((n: number) => `${n * 2}!`)(fa);
+) {
+  return pipe(
+    fa,
+    covariant.map((n: number) => `${n * 2}!`)
+  );
 }
 
 // Use with custom type X
