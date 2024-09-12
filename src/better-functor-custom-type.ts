@@ -25,7 +25,7 @@ const CovariantX: CovariantType<XTypeLambda> = {
   ),
   imap: dual(
     3,
-    (fa, to, _from) => ({ x: to(fa.x) })
+    (fa, to, _from) => ({ x: to(fa.x) }) // NOTE: We only demonstrate one direction A->B , from() is not used for B->A
   )
 };
 
