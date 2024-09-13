@@ -5,7 +5,7 @@ import * as Option from "effect/Option";
 import * as O from "@effect/typeclass/data/Option";
 import * as SA from "@effect/typeclass/SemiApplicative";
 
-// Curried addition functions
+// Curried addition functions - don't use dual here it doesn't work with ap!
 const add = (x: number) => (y: number): number => x + y;
 const add3 = (x: number) => (y: number) => (z: number): number => x + y + z;
 
