@@ -11,19 +11,19 @@ const add = (x: number) => (y: number): number => x + y;
 const add3 = (x: number) => (y: number) => (z: number): number => x + y + z;
 
 // Define recursive type for curried functions taking numbers
-type CurriedFunction<A extends number[], R> = A extends [infer First, ...infer Rest]
-  ? First extends number
-    ? Rest extends number[]
+type CurriedFunction<A extends R[], R> = A extends [infer First, ...infer Rest]
+  ? First extends R
+    ? Rest extends R[]
       ? (arg: First) => CurriedFunction<Rest, R>
       : R
     : never
   : R;
 
 // Function to apply curried functions using a provided Applicative Functor
-function applyCurriedFunction<F extends Applicative<any>, A extends number[]>(
+function applyCurriedFunction<F extends Applicative<any>, A extends X[], X>(
   A: F,
-  fn: CurriedFunction<A, number>, // Restricted to curried functions with numeric parameters
-  ...args: A                      // Variadic numeric arguments
+  fn: CurriedFunction<A, X>, // Restricted to curried functions with numeric parameters
+  ...args: number[]                      // Variadic numeric arguments
 ) {
   const ap = SA.ap(A);
   const of = A.of;
