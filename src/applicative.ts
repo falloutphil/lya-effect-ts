@@ -13,8 +13,8 @@ const concat = (x: string, y: string): string => x + y;
 // Function to lift the `add` function into the applicative context and apply it
 function applyFn<F extends TypeLambda, T>(
   A: Applicative<F>,
-  fn: (...args: [T, T]) => T, // Specific function type: add
-  ...args: [T,T]
+  fn: (...args: T[]) => T, // Specific function type: add
+  ...args: T[]
 ): Kind<F, unknown, never, never, T> {
   const ap = SA.ap(A);
   const of = A.of;
