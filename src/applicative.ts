@@ -6,33 +6,33 @@ import * as SA from "@effect/typeclass/SemiApplicative";
 import type { Applicative } from "@effect/typeclass/Applicative";
 import type { TypeLambda, Kind } from "effect/HKT";
 
-// Define the addition function taking two parameters
+// Define the addition and concatenation functions
 const add = (x: number, y: number): number => x + y;
 const concat = (x: string, y: string): string => x + y;
 
-// Function to lift the `add` function into the applicative context and apply it
+// Helper function to explicitly curry a function of two arguments
+function curry2<T, R>(fn: (a: T, b: T) => R): (a: T) => (b: T) => R {
+  return (a: T) => (b: T) => fn(a, b);
+}
+
+// Function to lift and apply a curried function in the applicative context
 function applyFn<F extends TypeLambda, T>(
   A: Applicative<F>,
-  fn: (...args: T[]) => T, // Specific function type: add
-  ...args: T[]
+  fn: (...args: T[]) => T, // Function explicitly typed for two arguments
+  ...args: T[]        // Expect exactly two arguments
 ): Kind<F, unknown, never, never, T> {
   const ap = SA.ap(A);
   const of = A.of;
 
-  // Lift the function into the Applicative context as a curried function
-  const liftedFn = of((x: T) => (y: T) => fn(x, y));
+  // Create an explicitly curried function
+  const curriedFn = curry2(fn);
 
-  // Lift the first argument
-  const liftedX = of(args[0]);
-
-  // Apply the first argument to the lifted function
-  const partiallyApplied = ap(liftedX)(liftedFn);
-
-  // Lift the second argument
-  const liftedY = of(args[1]);
-
-  // Apply the second argument
-  const result = ap(liftedY)(partiallyApplied);
+  // Lift the curried function into the applicative context
+  const liftedFn = of(curriedFn);
+  
+  // Lift and apply each argument step by step
+  const partiallyApplied1 = ap(of(args[0]))(liftedFn);  // Apply first argument
+  const result = ap(of(args[1]))(partiallyApplied1);    // Apply second argument
 
   return result;
 }
@@ -42,8 +42,7 @@ const resultOption = applyFn(O.Applicative, add, 3, 5);
 console.log(resultOption); // Expected: some(8)
 
 const resultOption2 = applyFn(O.Applicative, concat, 'Foo', 'Bar');
-console.log(resultOption2);
-
+console.log(resultOption2); // Expected: some("FooBar")
 
 const resultArray = applyFn(A.Applicative, add, 3, 5);
 console.log(resultArray); // Expected: [8]
