@@ -4,46 +4,47 @@ import * as O from "@effect/typeclass/data/Option";
 import * as A from "@effect/typeclass/data/Array";
 import * as SA from "@effect/typeclass/SemiApplicative";
 import type { Applicative } from "@effect/typeclass/Applicative";
+import type { TypeLambda, Kind } from "effect/HKT";
 
-// Curried addition functions
-const add = (x: number) => (y: number): number => x + y;
-const add3 = (x: number) => (y: number) => (z: number): number => x + y + z;
+// Define the addition function taking two parameters
+const add = (x: number, y: number): number => x + y;
+const concat = (x: string, y: string): string => x + y;
 
-// Define recursive type for curried functions taking numbers
-type CurriedFunction<A extends R[], R> = A extends [infer First, ...infer Rest]
-  ? First extends R
-    ? Rest extends R[]
-      ? (arg: First) => CurriedFunction<Rest, R>
-      : R
-    : never
-  : R;
-
-// Function to apply curried functions using a provided Applicative Functor
-function applyCurriedFunction<F extends Applicative<any>, A extends X[], X>(
-  A: F,
-  fn: CurriedFunction<A, X>, // Restricted to curried functions with numeric parameters
-  ...args: number[]          // Variadic numeric arguments NOTE: This SHOULD be "A", but TypeScript can't handle this
-                             // As a result, this will only work when args are numbers!
-) {
+// Function to lift the `add` function into the applicative context and apply it
+function applyFn<F extends TypeLambda, T>(
+  A: Applicative<F>,
+  fn: (...args: [T, T]) => T, // Specific function type: add
+  x: T,                            // First argument
+  y: T                             // Second argument
+): Kind<F, unknown, never, never, T> {
   const ap = SA.ap(A);
   const of = A.of;
-  // of(fn) is evaluated once as the initial accumulator (lifting the provided function)
-  // The accumulator (liftedFn) is passed through each call of ap(of(arg))(liftedFn),
-  // applying ap to the previous result and the next argument for the curried function.
-  return args.reduce(
-    (liftedFn, arg) => ap(of(arg))(liftedFn),
-    of(fn));
+
+  // Lift the function into the Applicative context as a curried function
+  const liftedFn = of((x: T) => (y: T) => fn(x, y));
+
+  // Lift the first argument
+  const liftedX = of(x);
+
+  // Apply the first argument to the lifted function
+  const partiallyApplied = ap(liftedX)(liftedFn);
+
+  // Lift the second argument
+  const liftedY = of(y);
+
+  // Apply the second argument
+  const result = ap(liftedY)(partiallyApplied);
+
+  return result;
 }
 
-// Test with curried functions add and add3
-const result = applyCurriedFunction(O.Applicative, add, 3, 5);
-console.log(result); // Output: some(8)
+// Test cases with Option and Array applicatives
+const resultOption = applyFn(O.Applicative, add, 3, 5);
+console.log(resultOption); // Expected: some(8)
 
-const result2 = applyCurriedFunction(O.Applicative, add3, 10, 6, 3);
-console.log(result2); // Output: some(19)
+const resultOption2 = applyFn(O.Applicative, concat, 'Foo', 'Bar');
+console.log(resultOption2);
 
-const result3 = applyCurriedFunction(A.Applicative, add, 3, 5);
-console.log(result3); // Output: [8]
 
-const result4 = applyCurriedFunction(A.Applicative, add3, 10, 6, 3);
-console.log(result4); // Output: [19]
+const resultArray = applyFn(A.Applicative, add, 3, 5);
+console.log(resultArray); // Expected: [8]
