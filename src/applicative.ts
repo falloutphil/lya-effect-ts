@@ -1,6 +1,5 @@
 // -*- compile-command: "npx ts-node applicative.ts" -*-
 
-import { pipe } from "effect/Function";
 import * as O from "@effect/typeclass/data/Option";
 import * as A from "@effect/typeclass/data/Array";
 import * as SA from "@effect/typeclass/SemiApplicative";
@@ -23,16 +22,17 @@ type CurriedFunction<A extends R[], R> = A extends [infer First, ...infer Rest]
 function applyCurriedFunction<F extends Applicative<any>, A extends X[], X>(
   A: F,
   fn: CurriedFunction<A, X>, // Restricted to curried functions with numeric parameters
-  ...args: number[]                      // Variadic numeric arguments
+  ...args: number[]          // Variadic numeric arguments NOTE: This SHOULD be "A", but TypeScript can't handle this
+                             // As a result, this will only work when args are numbers!
 ) {
   const ap = SA.ap(A);
   const of = A.of;
   // of(fn) is evaluated once as the initial accumulator (lifting the provided function)
   // The accumulator (liftedFn) is passed through each call of ap(of(arg))(liftedFn),
   // applying ap to the previous result and the next argument for the curried function.
-  return args.reduce((liftedFn, arg) => ap(of(arg))(liftedFn),
-                     of(fn));
-
+  return args.reduce(
+    (liftedFn, arg) => ap(of(arg))(liftedFn),
+    of(fn));
 }
 
 // Test with curried functions add and add3
@@ -42,9 +42,8 @@ console.log(result); // Output: some(8)
 const result2 = applyCurriedFunction(O.Applicative, add3, 10, 6, 3);
 console.log(result2); // Output: some(19)
 
-// Test with curried functions add and add3
 const result3 = applyCurriedFunction(A.Applicative, add, 3, 5);
-console.log(result3); // Output: some(8)
+console.log(result3); // Output: [8]
 
 const result4 = applyCurriedFunction(A.Applicative, add3, 10, 6, 3);
-console.log(result4); // Output: some(19)
+console.log(result4); // Output: [19]
