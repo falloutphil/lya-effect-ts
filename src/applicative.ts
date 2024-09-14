@@ -3,34 +3,40 @@
 import { pipe } from "effect/Function";
 import * as O from "@effect/typeclass/data/Option";
 import * as SA from "@effect/typeclass/SemiApplicative";
+import type { Applicative } from "@effect/typeclass/Applicative";
 
-// Curried addition functions - don't use dual here it doesn't work with ap!
+// Curried addition functions
 const add = (x: number) => (y: number): number => x + y;
 const add3 = (x: number) => (y: number) => (z: number): number => x + y + z;
 
-// Create a version of ap and of specifically for our Applicative instance
-const ap = SA.ap(O.Applicative);
-const of = O.Applicative.of;
+// Define recursive type for curried functions taking numbers
+type CurriedFunction<A extends number[], R> = A extends [infer First, ...infer Rest]
+  ? First extends number
+    ? Rest extends number[]
+      ? (arg: First) => CurriedFunction<Rest, R>
+      : R
+    : never
+  : R;
 
-// Wrapped functions in Option functors
-const addWrapped = of(add);
-const addWrapped3 = of(add3);
+// Function to apply curried functions using a provided Applicative Functor
+function applyCurriedFunction<F extends Applicative<any>, A extends number[]>(
+  A: F,
+  fn: CurriedFunction<A, number>, // Restricted to curried functions with numeric parameters
+  ...args: A                      // Variadic numeric arguments
+) {
+  const ap = SA.ap(A);
+  const of = A.of;
+  // of(fn) is evaluated once as the initial accumulator (lifting the provided function)
+  // The accumulator (liftedFn) is passed through each call of ap(of(arg))(liftedFn),
+  // applying ap to the previous result and the next argument for the curried function.
+  return args.reduce((liftedFn, arg) => ap(of(arg))(liftedFn),
+                     of(fn));
 
+}
 
-// Using SemiApplicative's `ap` method to apply the curried functions
-const result = pipe(
-  addWrapped,                                    // Start with the wrapped function
-  ap(of(3)),  // Apply to the first Option (x = 3)
-  ap(of(5))   // Apply to the second Option (y = 5)
-);
-
+// Test with curried functions add and add3
+const result = applyCurriedFunction(O.Applicative, add, 3, 5);
 console.log(result); // Output: some(8)
 
-const result2 = pipe(
-  addWrapped3,                                   // Start with the wrapped function
-  ap(of(10)), // Apply to the first Option (x = 10)
-  ap(of(6)),  // Apply to the second Option (y = 6)
-  ap(of(3))   // Apply to the third Option (z = 3)
-);
-
+const result2 = applyCurriedFunction(O.Applicative, add3, 10, 6, 3);
 console.log(result2); // Output: some(19)
