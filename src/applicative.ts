@@ -14,8 +14,7 @@ const concat = (x: string, y: string): string => x + y;
 function applyFn<F extends TypeLambda, T>(
   A: Applicative<F>,
   fn: (...args: [T, T]) => T, // Specific function type: add
-  x: T,                            // First argument
-  y: T                             // Second argument
+  ...args: [T,T]
 ): Kind<F, unknown, never, never, T> {
   const ap = SA.ap(A);
   const of = A.of;
@@ -24,13 +23,13 @@ function applyFn<F extends TypeLambda, T>(
   const liftedFn = of((x: T) => (y: T) => fn(x, y));
 
   // Lift the first argument
-  const liftedX = of(x);
+  const liftedX = of(args[0]);
 
   // Apply the first argument to the lifted function
   const partiallyApplied = ap(liftedX)(liftedFn);
 
   // Lift the second argument
-  const liftedY = of(y);
+  const liftedY = of(args[1]);
 
   // Apply the second argument
   const result = ap(liftedY)(partiallyApplied);
