@@ -2,6 +2,7 @@
 
 import { pipe } from "effect/Function";
 import * as O from "@effect/typeclass/data/Option";
+import * as A from "@effect/typeclass/data/Array";
 import * as SA from "@effect/typeclass/SemiApplicative";
 import type { Applicative } from "@effect/typeclass/Applicative";
 
@@ -40,3 +41,10 @@ console.log(result); // Output: some(8)
 
 const result2 = applyCurriedFunction(O.Applicative, add3, 10, 6, 3);
 console.log(result2); // Output: some(19)
+
+// Test with curried functions add and add3
+const result3 = applyCurriedFunction(A.Applicative, add, 3, 5);
+console.log(result3); // Output: some(8)
+
+const result4 = applyCurriedFunction(A.Applicative, add3, 10, 6, 3);
+console.log(result4); // Output: some(19)
