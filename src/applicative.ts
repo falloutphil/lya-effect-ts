@@ -8,6 +8,10 @@ import type { TypeLambda, Kind } from "effect/HKT";
 
 // Define the addition and concatenation functions
 const add = (x: number, y: number): number => x + y;
+const add3 = (x: number, y: number, z: number): number => x + y + z;
+// Test with variadic add_spread function
+const add_spread = (...args: number[]): number => args.reduce((acc, val) => acc + val, 0);
+// Test with strings
 const concat = (x: string, y: string): string => x + y;
 
 // A type for curried functions to make the return type explicit
@@ -42,9 +46,13 @@ function handleVariadicFunction<T>(
       return (a: T, b: T, c: T) => fn(a, b, c);
     case 4:
       return (a: T, b: T, c: T, d: T) => fn(a, b, c, d);
+    case 5:
+      return (a: T, b: T, c: T, d: T, e: T) => fn(a, b, c, d, e);
+    case 6:
+      return (a: T, b: T, c: T, d: T, e: T, f: T) => fn(a, b, c, d, e, f);
     // Extend further if needed
     default:
-      throw new Error(`Unsupported arity (1-4): ${arity}`);
+      throw new Error(`Unsupported arity (1-6): ${arity}`);
   }
 }
 
@@ -83,8 +91,11 @@ console.log(resultOption2); // Expected: some("FooBar")
 const resultArray = applyFn(A.Applicative, add, 3, 5);
 console.log(resultArray); // Expected: [8]
 
-// Test with variadic add_spread function
-const add_spread = (...args: number[]): number => args.reduce((acc, val) => acc + val, 0);
-
 const resultArray3 = applyFn(A.Applicative, add_spread, 1, 2, 3);
 console.log(resultArray3); // Expected: [6]
+
+const resultOption3 = applyFn(O.Applicative, add3, 2, 4, 6);
+console.log(resultOption3); // Expected some(20)
+
+const resultOption4 = applyFn(O.Applicative, add_spread, 2, 4, 6, 8);
+console.log(resultOption4); // Expected some(20)
