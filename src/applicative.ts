@@ -14,21 +14,18 @@ const add_spread = (...args: number[]): number => args.reduce((acc, val) => acc 
 // Test with strings
 const concat = (x: string, y: string): string => x + y;
 
-// A type for curried functions to make the return type explicit
-type CurriedFunction<T extends any[], R> = 
-  T extends [infer First, ...infer Rest]
-    ? (arg: First) => CurriedFunction<Rest, R>
-    : R;
-
 // The `curryN` function: It takes a function and the arity of that function as parameters
-function curryN<T extends any[], R>(fn: (...args: T) => R, arity: number = fn.length): CurriedFunction<T, R> {
+// NOTE: it won't work on variadic function using "rest" parameters because they are represented
+// as a single T[] parameter not T, T, T...
+// This is why we have handleVariadicFunction below to solve this!
+function curryN<T extends any[], R>(fn: (...args: T) => R, arity: number = fn.length) {
   return function curried(...args: any[]): any {
     if (args.length >= arity) {
       return fn(...args as T);
     } else {
       return (...moreArgs: any[]) => curried(...[...args, ...moreArgs]);
     }
-  } as CurriedFunction<T, R>;
+  };
 }
 
 // Function to convert a variadic function into a fixed-arity function using explicit lambdas
