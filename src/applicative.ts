@@ -8,6 +8,7 @@ import type { TypeLambda, Kind } from "effect/HKT";
 
 // Function to convert a variadic function into a fixed-arity function using explicit lambdas
 // This is required before we can use curryN
+// TODO:  Return Some(function) or None if arity is wrong
 function handleVariadicFunction<T>(
   fn: (...args: T[]) => T,
   arity: number
@@ -84,7 +85,7 @@ const add3 = (x: number, y: number, z: number): number => x + y + z;
 const add_spread = (...args: number[]): number => args.reduce((acc, val) => acc + val, 0);
 // Test with strings
 const concat = (x: string, y: string): string => x + y;
-// NOTE: You can use a generic MONOID to define this using empty for string and int!
+// TODO: You can use a generic MONOID to define this using empty for string and int!
 const concat_spread = (...args: string[]): string => args.reduce((acc, val) => acc + val, "");
 
 const resultOption = applyFn(O.Applicative, add, 3, 5);
