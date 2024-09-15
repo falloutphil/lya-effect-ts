@@ -84,6 +84,8 @@ const add3 = (x: number, y: number, z: number): number => x + y + z;
 const add_spread = (...args: number[]): number => args.reduce((acc, val) => acc + val, 0);
 // Test with strings
 const concat = (x: string, y: string): string => x + y;
+// NOTE: You can use a generic MONOID to define this using empty for string and int!
+const concat_spread = (...args: string[]): string => args.reduce((acc, val) => acc + val, "");
 
 const resultOption = applyFn(O.Applicative, add, 3, 5);
 console.log(resultOption); // Expected: some(8)
@@ -102,3 +104,6 @@ console.log(resultOption3); // Expected some(20)
 
 const resultOption4 = applyFn(O.Applicative, add_spread, 2, 4, 6, 8);
 console.log(resultOption4); // Expected some(20)
+
+const resultOption5 = applyFn(O.Applicative, concat_spread, "One", "Two", "Three", "Four");
+console.log(resultOption5); // Expected some(OneTwoThreeFour)
