@@ -64,7 +64,8 @@ function applyFn<F extends TypeLambda, T>(
   // Lift the curried function into the applicative context
   // Apply each lifted argument step by step
   // Help compiler by casting the final fully applied HKT to
-  // be of return type T
+  // be of return type T (each acc will apply one lifted arg
+  // which produces a new acc with on less curried parameter)
   const result = args.reduce(
     (acc, arg) => ap(of(arg))(acc),
     of(curriedFn)) as
