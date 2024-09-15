@@ -13,44 +13,32 @@ import { Monoid } from "@effect/typeclass/Monoid"; // Import the Monoid interfac
 // 
 // Function to convert a variadic function into a fixed-arity function using explicit lambdas
 // This is required before we can use curryN
-function handleVariadicFunction<T>(
+// If the arity doesn't match any function, Option.fromNullable returns Option.none.
+const handleVariadicFunction = <T>(
   fn: (...args: T[]) => T,
   arity: number
-) {
-  // Return a function with a fixed number of parameters based on arity
- switch (arity) {
-    case 1:
-      return Option.some((a: T) => fn(a));
-    case 2:
-      return Option.some((a: T, b: T) => fn(a, b));
-    case 3:
-      return Option.some((a: T, b: T, c: T) => fn(a, b, c));
-    case 4:
-      return Option.some((a: T, b: T, c: T, d: T) => fn(a, b, c, d));
-    case 5:
-      return Option.some((a: T, b: T, c: T, d: T, e: T) => fn(a, b, c, d, e));
-    case 6:
-      return Option.some((a: T, b: T, c: T, d: T, e: T, f: T) => fn(a, b, c, d, e, f));
-    // Extend further if needed
-    default:
-     return Option.none(); // Return None if the arity is not supported
-  }
-}
-
+) =>
+  Option.fromNullable([
+    (a: T) => fn(a),
+    (a: T, b: T) => fn(a, b),
+    (a: T, b: T, c: T) => fn(a, b, c),
+    (a: T, b: T, c: T, d: T) => fn(a, b, c, d),
+    (a: T, b: T, c: T, d: T, e: T) => fn(a, b, c, d, e),
+    (a: T, b: T, c: T, d: T, e: T, f: T) => fn(a, b, c, d, e, f)
+  ][arity - 1]);
 
 // The `curryN` function: It takes a function and the arity of that function as parameters
 // NOTE: it won't work on variadic function using "rest" parameters because they are represented
 // as a single T[] parameter not T, T, T...
 // This is why we have handleVariadicFunction to solve this!
-function curryN<T extends any[], R>(fn: (...args: T) => R) {
-  return function curried(...args: any[]): any {
-    if (args.length >= fn.length) {
-      return fn(...args as T);
-    } else {
-      return (...moreArgs: any[]) => curried(...[...args, ...moreArgs]);
-    }
-  };
-}
+const curryN = <T extends any[], R>
+  (fn: (...args: T) => R) => {
+    const curried = (...args: any[]): any =>
+      args.length >= fn.length
+      ? fn(...(args as T))
+      : (...moreArgs: any[]) => curried(...[...args, ...moreArgs]);
+  return curried;
+};
 
 // Function to apply arguments using reduce in a curried and pipe-friendly way
 // with the curried function passed from the previous pipe function being
@@ -76,17 +64,17 @@ const applyCurriedFunction = <F extends TypeLambda, T>
 
 // Function to lift and apply a curried function
 // to lifted arguments, in the applicative context
-function applyFn<F extends TypeLambda, T>(
+const applyFn = <F extends TypeLambda, T>(
   A: Applicative<F>,
-  fn: (...args: T[]) => T, // Variadic function
-  ...args: T[]             // Expect a variadic list of arguments
-) {
-  return pipe (
+  fn: (...args: T[]) => T,
+  ...args: T[]
+) =>
+  pipe(
     handleVariadicFunction(fn, args.length),
     Option.map(curryN),
     Option.map(applyCurriedFunction(A)(args))
-  )
-}
+  );
+
 
 // Test cases with Option and Array applicatives
 // ---------------------------------------------
