@@ -17,23 +17,41 @@ function curryN<T extends any[], R>(fn: (...args: T) => R, arity: number = fn.le
   } as CurriedFunction<T, R>;
 }
 
-const add2_spread = (...args: number[]): number => args[0] + args[1]
+// Function to convert a variadic function into a fixed-arity function using explicit lambdas
+function handleVariadicFunction<T>(
+  fn: (...args: T[]) => T,
+  arity: number
+) {
+  // Return a function with a fixed number of parameters based on arity
+  switch (arity) {
+    case 1:
+      return (a: T) => fn(a);
+    case 2:
+      return (a: T, b: T) => fn(a, b);
+    case 3:
+      return (a: T, b: T, c: T) => fn(a, b, c);
+    case 4:
+      return (a: T, b: T, c: T, d: T) => fn(a, b, c, d);
+    case 5:
+      return (a: T, b: T, c: T, d: T, e: T) => fn(a, b, c, d, e);
+    // Extend further if needed
+    default:
+      throw new Error(`Unsupported arity (1-5): ${arity}`);
+  }
+}
 
-// Example 1: Function that adds two numbers
-const add2 = (x: number, y: number): number => x + y;
+// Example of a variadic function
+const add2_spread = (...args: number[]): number => args[0] + args[1];
+
+// Convert the variadic function to a fixed-arity function using the lambda
+const add2 = handleVariadicFunction(add2_spread, 2);
+
+// Currying the fixed-arity function
 const curriedAdd2 = curryN(add2, 2);
 
-// Testing curriedAdd2
+// Applying arguments one by one to the curried function
 const add2Step1 = curriedAdd2(3); // Should return a function (number) => number
 const add2Result = add2Step1(5);  // Should return 8
-console.log(add2Result); // Expected output: 8
+console.log(`add2Result: ${add2Result}`); // Expected output: 8
 
-// Example 2: Function that adds three numbers
-const add3 = (x: number, y: number, z: number): number => x + y + z;
-const curriedAdd3 = curryN(add3, 3);
-
-// Testing curriedAdd3
-const add3Step1 = curriedAdd3(1);      // Should return a function (number) => (number) => number
-const add3Step2 = add3Step1(2);        // Should return a function (number) => number
-const add3Result = add3Step2(3);       // Should return 6
-console.log(add3Result); // Expected output: 6
+// You can follow the same process for add3 or any other arity
