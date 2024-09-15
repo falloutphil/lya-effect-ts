@@ -70,12 +70,13 @@ function applyCurriedFunction<F extends TypeLambda, T>(
 }
 
 
-// Function to lift and apply a curried function in the applicative context
+// Function to lift and apply a curried function
+// to lifted arguments, in the applicative context
 function applyFn<F extends TypeLambda, T>(
   A: Applicative<F>,
   fn: (...args: T[]) => T, // Variadic function
   ...args: T[]             // Expect a variadic list of arguments
-): Option.Option<Kind<F, unknown, never, never, T>> {
+) {
   return pipe (
     handleVariadicFunction(fn, args.length),
     Option.map(curryN),
