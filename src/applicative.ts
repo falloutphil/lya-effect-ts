@@ -97,22 +97,22 @@ const concat = (x: string, y: string): string => x + y;
 const concat_spread = (...args: string[]): string => args.reduce((acc, val) => acc + val, "");
 
 const resultOption = applyFn(O.Applicative, add, 3, 5);
-console.log(resultOption); // Expected: some(8)
+console.log(Option.getOrNull(resultOption)); // Expected: some(8)
 
 const resultOption2 = applyFn(O.Applicative, concat, 'Foo', 'Bar');
-console.log(resultOption2); // Expected: some("FooBar")
+console.log(Option.getOrNull(resultOption2)); // Expected: some("FooBar")
 
 const resultArray = applyFn(A.Applicative, add, 3, 5);
-console.log(resultArray); // Expected: [8]
+console.log(Option.getOrNull(resultArray)); // Expected: [8]
 
 const resultArray3 = applyFn(A.Applicative, add_spread, 1, 2, 3);
-console.log(resultArray3); // Expected: [6]
+console.log(Option.getOrNull(resultArray3)); // Expected: [6]
 
 const resultOption3 = applyFn(O.Applicative, add3, 2, 4, 6);
-console.log(resultOption3); // Expected some(20)
+console.log(Option.getOrNull(resultOption3)); // Expected some(20)
 
 const resultOption4 = applyFn(O.Applicative, add_spread, 2, 4, 6, 8);
-console.log(resultOption4); // Expected some(20)
+console.log(Option.getOrNull(resultOption4)); // Expected some(20)
 
 const resultOption5 = applyFn(O.Applicative, concat_spread, "One", "Two", "Three", "Four");
-console.log(resultOption5); // Expected some(OneTwoThreeFour)
+console.log(Option.getOrNull(resultOption5)); // Expected some(OneTwoThreeFour)
