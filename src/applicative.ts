@@ -50,13 +50,12 @@ function curryN<T extends any[], R>(fn: (...args: T) => R) {
 }
 
 // Function to apply arguments using reduce in a curried and pipe-friendly way
-function applyCurriedFunction<F extends TypeLambda, T>(
-  A: Applicative<F>
-) {
-  return (
-    // return curried function of 2 params given A
-    args: T[]) =>
-    (curriedFn: (arg: T) => any) => {
+// with the curried function passed from the previous pipe function being
+// the last (curried) parameter.
+const applyCurriedFunction = <F extends TypeLambda, T>
+  (A: Applicative<F>) =>
+  (args: T[]) =>
+  (curriedFn: (arg: T) => any) => {
       const ap = SA.ap(A);
       const of = A.of;
 
@@ -70,7 +69,6 @@ function applyCurriedFunction<F extends TypeLambda, T>(
         of(curriedFn)
       ) as Kind<F, unknown, never, never, T>;
     };
-}
 
 
 // Function to lift and apply a curried function
