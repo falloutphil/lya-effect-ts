@@ -104,8 +104,8 @@ const concat_spread = (...args: string[]): string => args.reduce((acc, val) => a
 
 const monoid_spread = <T>
   (monoid: Monoid<T>) =>
-  (...args: T[]): T => {
-  return args.reduce(monoid.combine, monoid.empty);
+  (...args: T[]) => {
+  return monoid.combineAll(args);
 }
 
 const numberSumResult = monoid_spread(MonoidSum)(1, 2, 3, 4); // Expected: 10
@@ -113,8 +113,6 @@ console.log(numberSumResult);
 
 const resultMonoid = applyFn(A.Applicative, monoid_spread(MonoidSum), 1, 2, 3, 4);
 console.log(Option.getOrNull(resultMonoid));
-
-
 
 const resultOption = applyFn(O.Applicative, add, 3, 5);
 console.log(Option.getOrNull(resultOption)); // Expected: some(8)
