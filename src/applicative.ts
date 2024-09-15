@@ -62,14 +62,15 @@ function applyFn<F extends TypeLambda, T>(
   const curriedFn = curryN(fixedFn);
 
   // Lift the curried function into the applicative context
-  let liftedFn = of(curriedFn);
+  // Apply each lifted argument step by step
+  // Help compiler by casting the final fully applied HKT to
+  // be of return type T
+  const result = args.reduce(
+    (acc, arg) => ap(of(arg))(acc),
+    of(curriedFn)) as
+  Kind<F, unknown, never, never, T>;
 
-  // Apply each argument step by step
-  for (const arg of args) {
-    liftedFn = ap(of(arg))(liftedFn);
-  }
-
-  return liftedFn as Kind<F, unknown, never, never, T>;
+  return result;
 }
 
 // Test cases with Option and Array applicatives
