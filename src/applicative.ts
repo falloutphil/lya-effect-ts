@@ -8,6 +8,10 @@ import type { TypeLambda, Kind } from "effect/HKT";
 import * as Option from "effect/Option";
 import {pipe} from "effect/Function";
 
+import { Monoid as StringMonoid } from "@effect/typeclass/data/String";
+import { MonoidSum, MonoidMultiply } from "@effect/typeclass/data/Number";
+import { Monoid } from "@effect/typeclass/Monoid"; // Import the Monoid interface
+// 
 // Function to convert a variadic function into a fixed-arity function using explicit lambdas
 // This is required before we can use curryN
 function handleVariadicFunction<T>(
@@ -97,6 +101,20 @@ const add_spread = (...args: number[]): number => args.reduce((acc, val) => acc 
 const concat = (x: string, y: string): string => x + y;
 // TODO: You can use a generic MONOID to define this using empty for string and int!
 const concat_spread = (...args: string[]): string => args.reduce((acc, val) => acc + val, "");
+
+const monoid_spread = <T>
+  (monoid: Monoid<T>) =>
+  (...args: T[]): T => {
+  return args.reduce(monoid.combine, monoid.empty);
+}
+
+const numberSumResult = monoid_spread(MonoidSum)(1, 2, 3, 4); // Expected: 10
+console.log(numberSumResult);
+
+const resultMonoid = applyFn(A.Applicative, monoid_spread(MonoidSum), 1, 2, 3, 4);
+console.log(Option.getOrNull(resultMonoid));
+
+
 
 const resultOption = applyFn(O.Applicative, add, 3, 5);
 console.log(Option.getOrNull(resultOption)); // Expected: some(8)
