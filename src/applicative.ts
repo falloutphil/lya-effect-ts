@@ -10,35 +10,7 @@ import {pipe} from "effect/Function";
 
 // Function to convert a variadic function into a fixed-arity function using explicit lambdas
 // This is required before we can use curryN
-// TODO:  Return Some(function) or None if arity is wrong
 function handleVariadicFunction<T>(
-  fn: (...args: T[]) => T,
-  arity: number
-) {
-  // Return a function with a fixed number of parameters based on arity
-  switch (arity) {
-    case 1:
-      return (a: T) => fn(a);
-    case 2:
-      return (a: T, b: T) => fn(a, b);
-    case 3:
-      return (a: T, b: T, c: T) => fn(a, b, c);
-    case 4:
-      return (a: T, b: T, c: T, d: T) => fn(a, b, c, d);
-    case 5:
-      return (a: T, b: T, c: T, d: T, e: T) => fn(a, b, c, d, e);
-    case 6:
-      return (a: T, b: T, c: T, d: T, e: T, f: T) => fn(a, b, c, d, e, f);
-    // Extend further if needed
-    default:
-      throw new Error(`Unsupported arity (1-6): ${arity}`);
-  }
-}
-
-
-// Function to convert a variadic function into a fixed-arity function using explicit lambdas
-// This is required before we can use curryN
-function handleVariadicFunctionOption<T>(
   fn: (...args: T[]) => T,
   arity: number
 ) {
@@ -82,7 +54,7 @@ function applyCurriedFunction<F extends TypeLambda, T>(
   A: Applicative<F>,
   curriedFn: (arg: T) => any,
   args: T[]
-): Kind<F, unknown, never, never, T> {
+) {
   const ap = SA.ap(A);
   const of = A.of;
 
@@ -97,6 +69,7 @@ function applyCurriedFunction<F extends TypeLambda, T>(
   ) as Kind<F, unknown, never, never, T>;
 }
 
+
 // Function to lift and apply a curried function in the applicative context
 function applyFn<F extends TypeLambda, T>(
   A: Applicative<F>,
@@ -104,7 +77,7 @@ function applyFn<F extends TypeLambda, T>(
   ...args: T[]             // Expect a variadic list of arguments
 ): Option.Option<Kind<F, unknown, never, never, T>> {
   return pipe (
-    handleVariadicFunctionOption(fn, args.length),
+    handleVariadicFunction(fn, args.length),
     Option.map(curryN),
     Option.map(curriedFn => applyCurriedFunction(A, curriedFn, args)),
   )
