@@ -6,29 +6,8 @@ import * as SA from "@effect/typeclass/SemiApplicative";
 import type { Applicative } from "@effect/typeclass/Applicative";
 import type { TypeLambda, Kind } from "effect/HKT";
 
-// Define the addition and concatenation functions
-const add = (x: number, y: number): number => x + y;
-const add3 = (x: number, y: number, z: number): number => x + y + z;
-// Test with variadic add_spread function
-const add_spread = (...args: number[]): number => args.reduce((acc, val) => acc + val, 0);
-// Test with strings
-const concat = (x: string, y: string): string => x + y;
-
-// The `curryN` function: It takes a function and the arity of that function as parameters
-// NOTE: it won't work on variadic function using "rest" parameters because they are represented
-// as a single T[] parameter not T, T, T...
-// This is why we have handleVariadicFunction below to solve this!
-function curryN<T extends any[], R>(fn: (...args: T) => R, arity: number = fn.length) {
-  return function curried(...args: any[]): any {
-    if (args.length >= arity) {
-      return fn(...args as T);
-    } else {
-      return (...moreArgs: any[]) => curried(...[...args, ...moreArgs]);
-    }
-  };
-}
-
 // Function to convert a variadic function into a fixed-arity function using explicit lambdas
+// This is required before we can use curryN
 function handleVariadicFunction<T>(
   fn: (...args: T[]) => T,
   arity: number
@@ -53,6 +32,21 @@ function handleVariadicFunction<T>(
   }
 }
 
+// The `curryN` function: It takes a function and the arity of that function as parameters
+// NOTE: it won't work on variadic function using "rest" parameters because they are represented
+// as a single T[] parameter not T, T, T...
+// This is why we have handleVariadicFunction to solve this!
+function curryN<T extends any[], R>(fn: (...args: T) => R) {
+  return function curried(...args: any[]): any {
+    if (args.length >= fn.length) {
+      return fn(...args as T);
+    } else {
+      return (...moreArgs: any[]) => curried(...[...args, ...moreArgs]);
+    }
+  };
+}
+
+
 // Function to lift and apply a curried function in the applicative context
 function applyFn<F extends TypeLambda, T>(
   A: Applicative<F>,
@@ -65,7 +59,7 @@ function applyFn<F extends TypeLambda, T>(
   // Convert the variadic function to a fixed-arity function
   const fixedFn = handleVariadicFunction(fn, args.length);
   // Create a curried version of the fixed-arity function
-  const curriedFn = curryN(fixedFn, args.length);
+  const curriedFn = curryN(fixedFn);
 
   // Lift the curried function into the applicative context
   let liftedFn = of(curriedFn);
@@ -79,6 +73,16 @@ function applyFn<F extends TypeLambda, T>(
 }
 
 // Test cases with Option and Array applicatives
+// ---------------------------------------------
+
+// Define the addition and concatenation functions
+const add = (x: number, y: number): number => x + y;
+const add3 = (x: number, y: number, z: number): number => x + y + z;
+// Test with variadic add_spread function
+const add_spread = (...args: number[]): number => args.reduce((acc, val) => acc + val, 0);
+// Test with strings
+const concat = (x: string, y: string): string => x + y;
+
 const resultOption = applyFn(O.Applicative, add, 3, 5);
 console.log(resultOption); // Expected: some(8)
 
