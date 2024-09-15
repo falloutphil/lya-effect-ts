@@ -49,24 +49,27 @@ function curryN<T extends any[], R>(fn: (...args: T) => R) {
   };
 }
 
-// Function to apply arguments using reduce
+// Function to apply arguments using reduce in a curried and pipe-friendly way
 function applyCurriedFunction<F extends TypeLambda, T>(
-  A: Applicative<F>,
-  curriedFn: (arg: T) => any,
-  args: T[]
+  A: Applicative<F>
 ) {
-  const ap = SA.ap(A);
-  const of = A.of;
+  return (
+    // return curried function of 2 params given A
+    args: T[]) =>
+    (curriedFn: (arg: T) => any) => {
+      const ap = SA.ap(A);
+      const of = A.of;
 
-  // Lift the curried function into the applicative context
-  // Apply each lifted argument step by step
-  // Help compiler by casting the final fully applied HKT to
-  // be of return type T (each acc will apply one lifted arg
-  // which produces a new acc with on less curried parameter)
-  return args.reduce(
-    (acc, arg) => ap(of(arg))(acc),
-    of(curriedFn)
-  ) as Kind<F, unknown, never, never, T>;
+      // Lift the curried function into the applicative context
+      // Apply each lifted argument step by step
+      // Help compiler by casting the final fully applied HKT to
+      // be of return type T (each acc will apply one lifted arg
+      // which produces a new acc with on less curried parameter)
+      return args.reduce(
+        (acc, arg) => ap(of(arg))(acc),
+        of(curriedFn)
+      ) as Kind<F, unknown, never, never, T>;
+    };
 }
 
 
@@ -80,7 +83,7 @@ function applyFn<F extends TypeLambda, T>(
   return pipe (
     handleVariadicFunction(fn, args.length),
     Option.map(curryN),
-    Option.map(curriedFn => applyCurriedFunction(A, curriedFn, args)),
+    Option.map(applyCurriedFunction(A)(args))
   )
 }
 
