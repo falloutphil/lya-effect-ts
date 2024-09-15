@@ -32,26 +32,41 @@ function handleVariadicFunction<T>(
       return (a: T, b: T, c: T) => fn(a, b, c);
     case 4:
       return (a: T, b: T, c: T, d: T) => fn(a, b, c, d);
-    case 5:
-      return (a: T, b: T, c: T, d: T, e: T) => fn(a, b, c, d, e);
     // Extend further if needed
     default:
-      throw new Error(`Unsupported arity (1-5): ${arity}`);
+      throw new Error(`Unsupported arity (1-4): ${arity}`);
   }
 }
 
-// Example of a variadic function
-const add2_spread = (...args: number[]): number => args[0] + args[1];
+// Example of a variadic function using reduce
+const add_spread = (...args: number[]): number => args.reduce((acc, val) => acc + val, 0);
 
-// Convert the variadic function to a fixed-arity function using the lambda
-const add2 = handleVariadicFunction(add2_spread, 2);
+// Create fixed-arity functions from the variadic function
+const add2 = handleVariadicFunction(add_spread, 2);
+const add3 = handleVariadicFunction(add_spread, 3);
+const add4 = handleVariadicFunction(add_spread, 4);
 
-// Currying the fixed-arity function
+// Currying the fixed-arity functions
 const curriedAdd2 = curryN(add2, 2);
+const curriedAdd3 = curryN(add3, 3);
+const curriedAdd4 = curryN(add4, 4);
 
-// Applying arguments one by one to the curried function
-const add2Step1 = curriedAdd2(3); // Should return a function (number) => number
-const add2Result = add2Step1(5);  // Should return 8
+// Applying arguments one by one to the curried functions
+
+// Testing curriedAdd2
+const add2Step1 = curriedAdd2(3); // Returns a function (number) => number
+const add2Result = add2Step1(5);  // Returns 8
 console.log(`add2Result: ${add2Result}`); // Expected output: 8
 
-// You can follow the same process for add3 or any other arity
+// Testing curriedAdd3
+const add3Step1 = curriedAdd3(1); // Returns a function (number) => (number) => number
+const add3Step2 = add3Step1(2);   // Returns a function (number) => number
+const add3Result = add3Step2(3);  // Returns 6
+console.log(`add3Result: ${add3Result}`); // Expected output: 6
+
+// Testing curriedAdd4
+const add4Step1 = curriedAdd4(1); // Returns a function (number) => (number) => (number) => number
+const add4Step2 = add4Step1(2);   // Returns a function (number) => (number) => number
+const add4Step3 = add4Step2(3);   // Returns a function (number) => number
+const add4Result = add4Step3(4);  // Returns 10
+console.log(`add4Result: ${add4Result}`); // Expected output: 10
