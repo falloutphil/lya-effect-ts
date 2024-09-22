@@ -14,6 +14,12 @@ import { Monoid } from "@effect/typeclass/Monoid"; // Import the Monoid interfac
 // Function to convert a variadic function into a fixed-arity function using explicit lambdas
 // This is required before we can use curryN
 // If the arity doesn't match any function, Option.fromNullable returns Option.none.
+// * Rest parameters (...args) always explicitly collect arguments into an array.
+// * Named parameters (a1, a2, a3) implicitly allow you to pass arguments individually,
+//   BUT you can use spread syntax to pass them as an array too.
+// * This is orthogonal to the fn.length which is ONLY set for NAMED parameters not REST
+// * This looks like an inconsistency then that we can read named parameters using ...args and still us fn.length
+//   BUT fn.length=0 when only using rest parameters.  But actually the two mechanisms ...args and length are independent.
 const handleVariadicFunction = <T>(
   fn: (...args: T[]) => T,
   arity: number
@@ -37,7 +43,7 @@ const handleVariadicFunction = <T>(
 const curryN = <T extends any[], R>
   (fn: (...args: T) => R) => {
     const curried = (...args: any[]): any =>
-      // args provided to curried function equal or more than fn we curried?
+      // args provided at runtime to curried function equal or more to static args supplied to fn we curried?
       args.length >= fn.length 
       ? fn(...(args as T)) // then just call the fn
       // else return a new curried function requesting moreArgs and combining them with args
