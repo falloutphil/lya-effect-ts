@@ -34,8 +34,11 @@ const handleVariadicFunction = <T>(
 const curryN = <T extends any[], R>
   (fn: (...args: T) => R) => {
     const curried = (...args: any[]): any =>
-      args.length >= fn.length
-      ? fn(...(args as T))
+      // args provided to curried function equal or more than fn we curried?
+      args.length >= fn.length 
+      ? fn(...(args as T)) // then just call the fn
+      // else return a new curried function requesting moreArgs and combining them with args
+      // at each call a new function is nested
       : (...moreArgs: any[]) => curried(...[...args, ...moreArgs]);
   return curried;
 };
