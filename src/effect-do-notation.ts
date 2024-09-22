@@ -16,7 +16,18 @@ const foo = pipe(
 
 console.log(foo); // Output: Some("3!")
 
+const foo2 = pipe(
+  O.Do,
+  O.bind("x", () => O.some(3)), // binds 3 to key x in our object
+  O.bind("y", () => O.some('!')), // binds ! to key y in our object
+  // Pipe passes to the map O.some({ x: 3, y: '!' })
+  O.map(({x,y}) => `${x}${y}`) // mapping function destructs the object passed in { x: 3, y: '!' }
+)
 
+console.log(foo2)
+
+// So O.bind takes a key name as string, a fn returning variable to store in string,
+// and an object that we are to add the key value pair to (which is passed by pipe as last param)
 const result = pipe(
   O.Do,
   O.bind("x", () => O.some(2)),
