@@ -38,7 +38,9 @@ const curryN = <T extends any[], R>
       args.length >= fn.length 
       ? fn(...(args as T)) // then just call the fn
       // else return a new curried function requesting moreArgs and combining them with args
-      // at each call a new function is nested and the value of curried's args increases
+      // at each call a new nested function is returned to the client
+      // which when called with more arguments the value of curried's args will increase
+      // and another function will be returned, until all args are exhausted
       : (...moreArgs: any[]) => curried(...[...args, ...moreArgs]);
   return curried;
 };
