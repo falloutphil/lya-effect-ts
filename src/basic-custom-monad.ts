@@ -65,7 +65,7 @@ const MonadX: MonadType<XTypeLambda> = {
 const result = pipe(
   MonadX.of(2),
   MonadX.flatMap((n: number) => MonadX.of(n * 2)),
-  MonadX.map((n) => `${n}!`)
+  MonadX.flatMap((n: number) => MonadX.of(`${n}!`))
 );
 
 console.log(result); // Output: { x: "4!" }
