@@ -15,6 +15,16 @@ const add = <F extends TypeLambda>
   (M: Monad<F>) =>
   (n: number) =>
   (value: DataPoint): Kind<F, unknown, never, never, DataPoint> =>
+  // This isn't a very interesting use of the monad
+  // Because it must work for all monads we can only use functions
+  // on the Monad typeclass.
+  // So here we just add the provided value to the unwrapped value
+  // and wrap it back up in a monad - there is no change to the Monadic
+  // context (for example Some->None), because that would specific to
+  // the instance of the Monad typeclass.
+  // This is arguably pointless and the Pierre example with Options
+  // is a much better use of a specific instance of the Monad typeclass
+  // but this does show that we can handle Monads generically!
   M.of(value + n);
 
 // Second monadic operation: Multiply by a number
