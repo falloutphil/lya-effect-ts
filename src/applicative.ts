@@ -41,8 +41,8 @@ const handleVariadicFunction = <T>(
 // - a client could do foo(1,2)(3) or foo(1)(2,3) and so on - so the onus is on the client
 // to use it correctly
 const curryN = <T extends any[], R>
-  (fn: (...args: T) => R) => {
-    const curried = (...args: any[]): any =>
+  (fn: (...args: T) => R) => { // NOTE: the args in fn's interface are never referenceable - it's fn's type signature
+    const curried = (...args: any[]): any => // curried's args are referenceable in it's function body
       // args provided at runtime to curried function equal or more to static args supplied to fn we curried?
       args.length >= fn.length 
       ? fn(...(args as T)) // then just call the fn
