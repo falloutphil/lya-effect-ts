@@ -10,7 +10,7 @@ import {pipe} from "effect/Function";
 import { Monoid as MonoidString } from "@effect/typeclass/data/String";
 import { MonoidSum } from "@effect/typeclass/data/Number";
 import { Monoid } from "@effect/typeclass/Monoid"; // Import the Monoid interface
-// 
+
 // Function to convert a variadic function into a fixed-arity function using explicit lambdas
 // This is required before we can use curryN
 // If the arity doesn't match any function, Option.fromNullable returns Option.none.
@@ -27,10 +27,13 @@ const handleVariadicFunction = <T>(
     (a: T, b: T, c: T, d: T, e: T, f: T) => fn(a, b, c, d, e, f)
   ][arity - 1]);
 
-// The `curryN` function: It takes a function and the arity of that function as parameters
-// NOTE: it won't work on variadic function using "rest" parameters because they are represented
-// as a single T[] parameter not T, T, T...
+// NOTE: curryN won't work on variadic function using "rest" parameters because they are represented
+// as a single T[] parameter not T, T, T... and fn.length represents the length of parameters
+// BEFORE the rest.  So fn: (...args: T[]) => T - returns fn.length = 0!!!!
 // This is why we have handleVariadicFunction to solve this!
+// Also NOTE: it doesn't enforce currying of the form foo(1)(2)(3)
+// - a client could do foo(1,2)(3) or foo(1)(2,3) and so on - so the onus is on the client
+// to use it correctly
 const curryN = <T extends any[], R>
   (fn: (...args: T) => R) => {
     const curried = (...args: any[]): any =>
