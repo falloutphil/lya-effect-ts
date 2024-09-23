@@ -62,7 +62,7 @@ const MonadX: MonadType<XTypeLambda> = {
   imap: CovariantX.imap
 };
 
-// Original Example
+// Example of chaining results
 const result = pipe(
   MonadX.of(2),
   MonadX.flatMap((n: number) => MonadX.of(n * 2)),
@@ -70,6 +70,7 @@ const result = pipe(
 );
 
 console.log(result); // Output: { x: "4!" }
+
 
 // Additional examples using functions from FlatMap
 
