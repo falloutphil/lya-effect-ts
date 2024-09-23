@@ -6,7 +6,7 @@ import { Monad as MonadType } from "@effect/typeclass/Monad";
 import { flatten, zipRight, composeK } from "@effect/typeclass/FlatMap";
 import type { Kind, TypeLambda } from "effect/HKT";
 
-// Define the custom HKT X
+// Define the custom and trivial HKT X
 type X<A> = {
   x: A;
 };
