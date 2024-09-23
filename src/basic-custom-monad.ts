@@ -3,6 +3,7 @@
 import { pipe, dual } from "effect/Function";
 import type { Covariant as CovariantType } from "@effect/typeclass/Covariant";
 import { Monad as MonadType } from "@effect/typeclass/Monad";
+import { flatten, zipRight, composeK } from "@effect/typeclass/FlatMap";
 import type { Kind, TypeLambda } from "effect/HKT";
 
 // Define the custom HKT X
@@ -61,7 +62,7 @@ const MonadX: MonadType<XTypeLambda> = {
   imap: CovariantX.imap
 };
 
-// Test 
+// Original Example
 const result = pipe(
   MonadX.of(2),
   MonadX.flatMap((n: number) => MonadX.of(n * 2)),
@@ -69,3 +70,23 @@ const result = pipe(
 );
 
 console.log(result); // Output: { x: "4!" }
+
+// Additional examples using functions from FlatMap
+
+// Example 1: Using `flatten`
+const nested = MonadX.of(MonadX.of(42)); // { x: { x: 42 } }
+const flattened = flatten(MonadX)(nested);
+console.log(flattened); // Output: { x: 42 }
+
+// Example 2: Using `zipRight`, discarding the first result of 2
+const resultZipRight = zipRight(MonadX)(MonadX.of(2), MonadX.of("Second!"));
+console.log(resultZipRight); // Output: { x: "Second!" }
+
+// Example 3: Using `composeK`
+const composed = composeK(MonadX)(
+  (n: number) => MonadX.of(n + 1),
+  (n: number) => MonadX.of(n * 2)
+);
+
+const resultComposed = composed(3); // First add 1 -> 4, then multiply by 2 -> 8
+console.log(resultComposed); // Output: { x: 8 }
