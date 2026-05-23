@@ -1,4 +1,4 @@
-// -*- compile-command: "npx ts-node better-functor-custom-type.ts" -*-
+// -*- compile-command: "npx tsx src/better-functor-custom-type.ts" -*-
 
 import { dual, pipe } from "effect/Function";
 import * as A from "@effect/typeclass/data/Array"; // Importing Covariant instance for arrays

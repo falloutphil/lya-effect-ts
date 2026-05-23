@@ -1,4 +1,4 @@
-// -*- compile-command: "npx ts-node monoid-flatten-array.ts" -*-
+// -*- compile-command: "npx tsx src/monoid-flatten-array.ts" -*-
 
 import { pipe } from "effect/Function";
 import { getMonoid } from "@effect/typeclass/data/Array"; // Importing array-specific Monoid instance

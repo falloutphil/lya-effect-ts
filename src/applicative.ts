@@ -1,4 +1,4 @@
-// -*- compile-command: "npx ts-node applicative.ts" -*-
+// -*- compile-command: "npx tsx src/applicative.ts" -*-
 
 import * as O from "@effect/typeclass/data/Option";
 import * as A from "@effect/typeclass/data/Array";

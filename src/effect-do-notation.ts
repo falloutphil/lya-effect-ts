@@ -1,4 +1,4 @@
-// -*- compile-command: "npx ts-node effect-do-notation.ts" -*-
+// -*- compile-command: "npx tsx src/effect-do-notation.ts" -*-
 
 import { pipe } from "effect/Function";
 import * as O from "effect/Option";

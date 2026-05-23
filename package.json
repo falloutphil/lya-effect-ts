@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "check": "tsc --noEmit",
+    "run:examples": "for f in src/*.ts; do echo \"RUN:$f\"; tsx \"$f\"; done",
+    "test": "npm run check"
   },
   "repository": {
     "type": "git",
@@ -17,12 +19,14 @@
   },
   "homepage": "https://github.com/falloutphil/lya-effect-ts#readme",
   "devDependencies": {
-    "typescript": "^5.5.4"
+    "@types/node": "^22.15.21",
+    "tsx": "^4.20.6",
+    "typescript": "^5.8.3"
   },
   "dependencies": {
     "@effect/data": "^0.18.7",
-    "@effect/typeclass": "^0.26.2",
-    "effect": "^3.7.2"
+    "@effect/typeclass": "^0.40.0",
+    "effect": "^3.21.2"
   },
   "description": ""
 }

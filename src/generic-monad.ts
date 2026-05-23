@@ -1,4 +1,4 @@
-// -*- compile-command: "npx ts-node generic-monad.ts" -*-
+// -*- compile-command: "npx tsx src/generic-monad.ts" -*-
 
 import { pipe } from "@effect/data/Function";
 import * as O from "@effect/typeclass/data/Option"; // Option Monad

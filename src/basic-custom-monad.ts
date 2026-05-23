@@ -1,4 +1,4 @@
-// -*- compile-command: "npx ts-node basic-custom-monad.ts" -*-
+// -*- compile-command: "npx tsx src/basic-custom-monad.ts" -*-
 
 import { pipe, dual } from "effect/Function";
 import type { Covariant as CovariantType } from "@effect/typeclass/Covariant";

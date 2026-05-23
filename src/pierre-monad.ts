@@ -1,8 +1,8 @@
-// -*- compile-command: "npx ts-node pierre-monad.ts" -*-
+// -*- compile-command: "npx tsx src/pierre-monad.ts" -*-
 
-// Importing necessary functions and types from effect-ts
-import { pipe } from '@effect/data/Function';
-import * as O from '@effect/data/Option'; // Option is the equivalent of Maybe in effect-ts
+// Importing necessary functions and types from Effect
+import { pipe } from "effect/Function";
+import * as O from "effect/Option"; // Option is the equivalent of Maybe in Effect
 
 // Type aliases for birds and pole
 type Birds = number;
@@ -10,14 +10,14 @@ type Pole = [Birds, Birds]; // A tuple representing birds on the left and right
 
 /**
  * landLeft function
- * Effect-TS equivalent: Adds birds to the left side and checks balance; returns None if unbalanced
+ * Effect equivalent: Adds birds to the left side and checks balance; returns None if unbalanced
  */
 const landLeft = (n: Birds) => (pole: Pole): O.Option<Pole> =>
   Math.abs((pole[0] + n) - pole[1]) < 4 ? O.some([pole[0] + n, pole[1]] as Pole) : O.none();
 
 /**
  * landRight function
- * Effect-TS equivalent: Adds birds to the right side and checks balance; returns None if unbalanced
+ * Effect equivalent: Adds birds to the right side and checks balance; returns None if unbalanced
  */
 const landRight = (n: Birds) => (pole: Pole): O.Option<Pole> =>
   Math.abs(pole[0] - (pole[1] + n)) < 4 ? O.some([pole[0], pole[1] + n] as Pole) : O.none();
@@ -38,7 +38,7 @@ console.log('Landing sequence result:', landingSequence); // Should output: None
 
 /**
  * banana function
- * Effect-TS equivalent: Causes Pierre to fall by always returning None, representing failure
+ * Effect equivalent: Causes Pierre to fall by always returning None, representing failure
  */
 const banana = (_: Pole): O.Option<Pole> => O.none();
 
