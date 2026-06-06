@@ -1,4 +1,4 @@
-// -*- compile-command: "npx tsx src/optional-effect.ts" -*-
+// -*- compile-command: "npx tsx optional-effect.ts" -*-
 
 // You can see my original fp-ts code here this is based on:
 // https://github.com/falloutphil/fp-ts-doodling/blob/main/Optional-use-fp.ts

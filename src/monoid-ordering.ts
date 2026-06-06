@@ -1,4 +1,4 @@
-// -*- compile-command: "npx tsx src/monoid-ordering.ts" -*-
+// -*- compile-command: "npx tsx monoid-ordering.ts" -*-
 
 import { combineAll, Ordering } from "effect/Ordering"; // Importing combineAll for combining orderings
 import * as Ord from "effect/Order"; // Importing all Order instances and utilities from Order module

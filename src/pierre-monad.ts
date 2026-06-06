@@ -1,4 +1,4 @@
-// -*- compile-command: "npx tsx src/pierre-monad.ts" -*-
+// -*- compile-command: "npx tsx pierre-monad.ts" -*-
 
 // Importing necessary functions and types from Effect
 import { pipe } from "effect/Function";

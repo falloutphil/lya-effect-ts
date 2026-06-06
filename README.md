@@ -51,10 +51,7 @@ npm run run:examples
 
 ## Run One Exercise At A Time
 
-Every source file has a `compile-command` header at the top. The simplest way to
-run an individual exercise is to use that exact command.
-
-The current commands are:
+From the repo root, run an individual exercise like this:
 
 ```bash
 npx tsx src/applicative.ts
@@ -70,6 +67,10 @@ npx tsx src/optional-effect.ts
 npx tsx src/optional-standalone.ts
 npx tsx src/pierre-monad.ts
 ```
+
+Each source file also has a file-local `compile-command` header for Emacs.
+Those headers are written to work with `M-x compile` from the file buffer in
+`src/`, so they use `npx tsx <file>.ts` rather than `npx tsx src/<file>.ts`.
 
 ## Suggested Reading Order
 

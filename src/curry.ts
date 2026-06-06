@@ -1,4 +1,4 @@
-// -*- compile-command: "npx tsx src/curry.ts" -*-
+// -*- compile-command: "npx tsx curry.ts" -*-
 
 // A type for curried functions to make the return type explicit
 type CurriedFunction<T extends any[], R> = 

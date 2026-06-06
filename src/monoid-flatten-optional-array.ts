@@ -1,4 +1,4 @@
-// -*- compile-command: "npx tsx src/monoid-flatten-optional-array.ts" -*-
+// -*- compile-command: "npx tsx monoid-flatten-optional-array.ts" -*-
 
 import { pipe } from "effect/Function"; // Importing the pipe function for functional composition
 import * as Option from "effect/Option"; // Importing Option type and utility functions

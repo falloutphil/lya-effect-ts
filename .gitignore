@@ -13,3 +13,6 @@ build/
 
 # Ignore logs
 *.log
+
+# RAG context etc
+textbooks/
