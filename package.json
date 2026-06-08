@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/falloutphil/lya-effect-ts#readme",
   "devDependencies": {
+    "@effect/language-service": "^0.86.2",
     "@types/node": "^22.15.21",
     "tsx": "^4.20.6",
     "typescript": "^5.8.3"
