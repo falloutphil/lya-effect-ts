@@ -5,7 +5,8 @@
   "scripts": {
     "check": "tsc --noEmit",
     "run:examples": "for f in src/*.ts; do echo \"RUN:$f\"; tsx \"$f\"; done",
-    "test": "npm run check"
+    "test": "npm run check",
+    "prepare": "effect-language-service patch"
   },
   "repository": {
     "type": "git",
