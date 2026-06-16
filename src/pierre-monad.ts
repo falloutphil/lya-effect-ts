@@ -69,14 +69,18 @@ const landingSequenceFlatMap = pipe(
   O.flatMap(landRight(-2))
 );
 
-// NOTE: this is the pipe friendly form of O.flatMap(f) 
-// There is also the non-pipe form where the function is the second param:
+// NOTE: the above is the pipe friendly (data-last) form of O.flatMap(f):
+// eg  O.flatMap(landLeft(1))
+// It returns a function waiting for the previous Option<Pole>
+// from pipe.
+
+// There is also the non-pipe (data-first) form where the function is the second param:
 // O.flatMap(
 //   O.some([0, 0] as Pole),
 //   landLeft(1)
 // )
 //
-// This is just return (0,0) >>= landLeft 1 
+// Haskell equivalent: return (0,0) >>= landLeft 1 which is just (>>=) (return (0,0)) (landLeft 1)
 
 /**
  * 2. O.Do notation
