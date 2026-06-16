@@ -73,6 +73,11 @@ const landingSequenceFlatMap = pipe(
 // eg  O.flatMap(landLeft(1))
 // It returns a function waiting for the previous Option<Pole>
 // from pipe.
+// Remember: pipe(value, f1, f2, f3) is just f3(f2(f1(value))) so the first param of O.flatMap
+// in this form is the function to apply to the previous value, not the previous value itself.
+// So `O.flatMap(landLeft(1))` has already been turned into a function
+// of type Option<Pole> -> Option<Pole>. The previous Option<Pole>
+// is supplied by pipe.
 
 // There is also the non-pipe (data-first) form where the function is the second param:
 // O.flatMap(
@@ -81,6 +86,9 @@ const landingSequenceFlatMap = pipe(
 // )
 //
 // Haskell equivalent: return (0,0) >>= landLeft 1 which is just (>>=) (return (0,0)) (landLeft 1)
+
+
+
 
 /**
  * 2. O.Do notation
