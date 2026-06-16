@@ -69,6 +69,15 @@ const landingSequenceFlatMap = pipe(
   O.flatMap(landRight(-2))
 );
 
+// NOTE: this is the pipe friendly form of O.flatMap(f) 
+// There is also the non-pipe form where the function is the second param:
+// O.flatMap(
+//   O.some([0, 0] as Pole),
+//   landLeft(1)
+// )
+//
+// This is just return (0,0) >>= landLeft 1 
+
 /**
  * 2. O.Do notation
  *
