@@ -62,11 +62,11 @@ const banana = (_: Pole): O.Option<Pole> => O.none();
  * If the previous value is None, the rest is skipped.
  */
 const landingSequenceFlatMap = pipe(
-  O.some([0, 0] as Pole),
-  O.flatMap(landLeft(1)),
-  O.flatMap(landRight(4)), // Change 4 to 3 for success
-  O.flatMap(landLeft(-1)),
-  O.flatMap(landRight(-2))
+  O.some([0, 0] as Pole), // Start with an initial balanced pole in the Option context
+  O.flatMap(landLeft(1)), // First, land 1 bird on the left
+  O.flatMap(landRight(4)), // Then, land 4 birds on the right. Change 4 to 3 for success
+  O.flatMap(landLeft(-1)), // Next, one bird flies away from the left
+  O.flatMap(landRight(-2)) // Finally, two birds fly away from the right
 );
 
 // NOTE: the above is the pipe friendly (data-last) form of O.flatMap(f):
@@ -105,11 +105,11 @@ const landingSequenceFlatMap = pipe(
  */
 const landingSequenceDo = pipe(
   O.Do,
-  O.bind("pole0", () => O.some([0, 0] as Pole)),
-  O.bind("pole1", ({ pole0 }) => landLeft(1)(pole0)),
-  O.bind("pole2", ({ pole1 }) => landRight(4)(pole1)), // Change 4 to 3 for success
-  O.bind("pole3", ({ pole2 }) => landLeft(-1)(pole2)),
-  O.bind("pole4", ({ pole3 }) => landRight(-2)(pole3)),
+  O.bind("pole0", () => O.some([0, 0] as Pole)), // Start by binding the initial balanced pole
+  O.bind("pole1", ({ pole0 }) => landLeft(1)(pole0)), // From pole0, land 1 bird on the left
+  O.bind("pole2", ({ pole1 }) => landRight(4)(pole1)), // From pole1, land 4 birds on the right. Change 4 to 3 for success
+  O.bind("pole3", ({ pole2 }) => landLeft(-1)(pole2)), // From pole2, one bird flies away from the left
+  O.bind("pole4", ({ pole3 }) => landRight(-2)(pole3)), // From pole3, two birds fly away from the right
   O.map(({ pole4 }) => pole4)
 );
 
@@ -130,11 +130,11 @@ const landingSequenceDo = pipe(
  * If any yielded Option is None, the generator stops and the whole result is None.
  */
 const landingSequenceGen = O.gen(function* () {
-  const pole0 = yield* O.some([0, 0] as Pole);
-  const pole1 = yield* landLeft(1)(pole0);
-  const pole2 = yield* landRight(4)(pole1); // Change 4 to 3 for success
-  const pole3 = yield* landLeft(-1)(pole2);
-  const pole4 = yield* landRight(-2)(pole3);
+  const pole0 = yield* O.some([0, 0] as Pole); // Start with an initial balanced pole
+  const pole1 = yield* landLeft(1)(pole0); // First, land 1 bird on the left
+  const pole2 = yield* landRight(4)(pole1); // Then, land 4 birds on the right. Change 4 to 3 for success
+  const pole3 = yield* landLeft(-1)(pole2); // Next, one bird flies away from the left
+  const pole4 = yield* landRight(-2)(pole3); // Finally, two birds fly away from the right
 
   return pole4;
 });
@@ -145,24 +145,24 @@ const landingSequenceGen = O.gen(function* () {
  * banana returns None, so the final landRight(1) is never reached.
  */
 const failedLandingFlatMap = pipe(
-  O.some([0, 0] as Pole),
-  O.flatMap(landLeft(1)),
-  O.flatMap(banana),
-  O.flatMap(landRight(1))
+  O.some([0, 0] as Pole), // Start with a balanced pole
+  O.flatMap(landLeft(1)), // Land 1 bird on the left
+  O.flatMap(banana), // Slip on the banana: this guarantees failure
+  O.flatMap(landRight(1)) // This step is never reached
 );
 
 const failedLandingDo = pipe(
   O.Do,
-  O.bind("pole0", () => O.some([0, 0] as Pole)),
-  O.bind("pole1", ({ pole0 }) => landLeft(1)(pole0)),
-  O.bind("pole2", ({ pole1 }) => banana(pole1)),
-  O.bind("pole3", ({ pole2 }) => landRight(1)(pole2)),
+  O.bind("pole0", () => O.some([0, 0] as Pole)), // Start with a balanced pole
+  O.bind("pole1", ({ pole0 }) => landLeft(1)(pole0)), // Land 1 bird on the left
+  O.bind("pole2", ({ pole1 }) => banana(pole1)), // Slip on the banana: this returns None
+  O.bind("pole3", ({ pole2 }) => landRight(1)(pole2)), // This bind is never reached
   O.map(({ pole3 }) => pole3)
 );
 
 const failedLandingGen = O.gen(function* () {
-  const pole0 = yield* O.some([0, 0] as Pole);
-  const pole1 = yield* landLeft(1)(pole0);
+  const pole0 = yield* O.some([0, 0] as Pole); // Start with a balanced pole
+  const pole1 = yield* landLeft(1)(pole0); // Land 1 bird on the left
 
   // This yields None, so execution stops here.
   const pole2 = yield* banana(pole1);
