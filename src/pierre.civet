@@ -1,4 +1,4 @@
-// -*- compile-command: "npm --prefix .. run run:pierre:civet" -*-
+// -*- compile-command: "npm run run:pierre:civet" -*-
 // A first Civet example for readers who know a little Haskell.
 // Run from the repo root: npm run run:pierre:civet
 // Read the README's Civet tutorial alongside this file.
