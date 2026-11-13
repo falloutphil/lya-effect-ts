@@ -1,0 +1,49 @@
+// -*- compile-command: "npm --prefix .. run run:pierre:civet" -*-
+// One routine, first with Maybe (Option), then Either (Result). See the README.
+import { Option, Result } from "effect"
+
+type Birds = number
+type Pole = readonly [left: Birds, right: Birds]
+
+// W is the wrapped Pole. The routine never needs to inspect that wrapper.
+type PoleOps<W> = {
+  of: (pole: Pole) => W
+  fail: (pole: Pole) => W
+  flatMap: (value: W, next: (pole: Pole) => W) => W
+}
+
+makeLanding := <W>(M: PoleOps<W>, side: "left" | "right") =>
+  (birds: Birds) => ([left, right]: Pole): W =>
+    next: Pole := if side === "left" then [left + birds, right] else [left, right + birds]
+    if Math.abs(next[0] - next[1]) < 4 then M.of(next) else M.fail(next)
+
+pierre := <W>(M: PoleOps<W>): W =>
+  operator bind := M.flatMap
+  pure := M.of
+  landLeft := makeLanding M, "left"
+  landRight := makeLanding M, "right"
+
+  (pure([0, 0])
+    bind landLeft(1)
+    bind landRight(4)
+    bind landLeft(-1)
+    bind landRight(-2))
+
+// The interpreter changes; the routine and all its inputs stay the same.
+Maybe: PoleOps<Option.Option<Pole>> := {
+  of: Option.some
+  fail: () => Option.none()
+  flatMap: Option.flatMap
+}
+
+Either: PoleOps<Result.Result<Pole, string>> := {
+  of: Result.succeed
+  fail: ([left, right]) => Result.fail(`Pierre fell: left=${left}, right=${right}`)
+  flatMap: Result.flatMap
+}
+
+maybeLanding: Option.Option<Pole> := pierre Maybe
+eitherLanding: Result.Result<Pole, string> := pierre Either
+
+console.log "Maybe (Option):", maybeLanding
+console.log "Either (Result):", eitherLanding

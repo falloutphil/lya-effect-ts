@@ -3,8 +3,10 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "check": "tsc --noEmit",
-    "run:examples": "set -e; for f in src/*.ts; do echo \"RUN:$f\"; node --import tsx \"$f\"; done",
+    "check": "tsc --noEmit && npm run check:civet",
+    "check:civet": "civet --typecheck src/pierre.civet",
+    "run:examples": "set -e; for f in src/*.ts; do echo \"RUN:$f\"; node --import tsx \"$f\"; done; npm run run:pierre:civet",
+    "run:pierre:civet": "node --import @danielx/civet/register src/pierre.civet",
     "test": "npm run check && npm run run:examples",
     "prepare": "effect-language-service patch"
   },
@@ -20,6 +22,7 @@
   },
   "homepage": "https://github.com/falloutphil/lya-effect-ts#readme",
   "devDependencies": {
+    "@danielx/civet": "0.11.16",
     "@effect/language-service": "^0.87.5",
     "@types/node": "^22.15.21",
     "tsx": "^4.20.6",
