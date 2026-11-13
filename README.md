@@ -342,6 +342,39 @@ the type constructor `m` itself. Every step here produces another Pole. We do
 not need to describe arbitrary changes from `m a` to `m b`, so we can keep this
 interface small and avoid higher-kinded-type machinery in the lesson.
 
+### The behavioural promise behind `PoleOps`
+
+**We expect W to be the result type of a lawful monad, with `of` and `flatMap`
+faithfully implementing its operations.** The interface above only checks the
+function signatures. It cannot establish that behavioural promise, and neither
+would giving our own interface the name `Monad`.
+
+For the Pole-specific operations here, the monad laws say:
+
+- Wrapping a pole and binding a function gives the same result as calling that
+  function directly: `flatMap(of(p), f)` behaves like `f(p)`.
+- Binding the success constructor preserves the result:
+  `flatMap(w, of)` behaves like `w`.
+- Regrouping successive binds preserves the result:
+  `flatMap(flatMap(w, f), g)` behaves like
+  `flatMap(w, p => flatMap(f(p), g))`.
+
+Here `p` is a Pole, `w` is a wrapped Pole, and `f` and `g` take a Pole and return
+a wrapped Pole. “Same result” means equivalent observable behaviour, not
+necessarily the identical JavaScript object.
+
+Pierre also needs a failure policy: a result produced by `fail` must propagate
+through `flatMap` without calling the next landing. That policy is additional
+to the monad laws; not every monad has this kind of failure.
+
+The dictionaries below satisfy our expectation by using Effect's actual Option
+and Result operations. Arbitrary functions with matching types could violate
+the laws or failure policy. In that case the intended monadic behaviour is
+**not guaranteed**: a callback might be skipped after success, an error might
+be lost, or regrouping might change the answer. This is not JavaScript
+“undefined behaviour”; the functions execute according to their implementations.
+The interface provides no automatic detection of such misuse.
+
 ### Supply the operations as ordinary objects
 
 ```civet

@@ -25,6 +25,18 @@ type Pole = readonly [left: Birds, right: Birds]
 // Pole itself is not generic: there is no Pole<W> here.
 // PoleOps<W> means "the operations that agree on this choice of W".
 //
+// EXPECTATION: W is the result type of a lawful monad, and the supplied of and
+// flatMap faithfully implement that monad's operations, specialised to Pole.
+// They must obey the identity and associativity laws explained in the README.
+// For this routine, fail must also produce a failure that flatMap propagates
+// without calling the next landing. This failure rule is additional to the laws.
+//
+// TypeScript checks the signatures below, NOT these behavioural promises.
+// We fulfil them here by using Effect's actual Option and Result operations.
+// For arbitrary matching functions that break these promises, the intended
+// monadic behaviour is not guaranteed; the interface cannot detect that misuse.
+// This isn't JavaScript "undefined behaviour": the supplied functions still run.
+//
 // These fields are FUNCTION TYPES. `: (pole: Pole) => W` describes a function;
 // it does not call one. The actual functions are supplied in objects below.
 type PoleOps<W> = {
@@ -92,6 +104,7 @@ pierre := <W>(M: PoleOps<W>): W =>
     bind landRight(-2))
 
 // A "dictionary" is an ordinary object containing functions.
+// It's an instance of PoleOps.
 // Maybe is a local constant, not a new type or an imported Haskell definition.
 // Option.Option<Pole> is the TYPE; Option.some/none/flatMap are runtime FUNCTIONS.
 // The annotation checks all three fields agree on the wrapped Pole type.
