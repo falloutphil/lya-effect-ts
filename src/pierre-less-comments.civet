@@ -1,0 +1,53 @@
+// -*- compile-command: "npx civet pierre-less-comments.civet" -*-
+// Same example as pierre.civet; see that file for the teaching comments.
+
+import { Option, Result } from "effect"
+
+type Birds = number
+
+type Pole = readonly [left: Birds, right: Birds]
+
+type PoleOps<W> = {
+  of: (pole: Pole) => W
+  fail: (pole: Pole) => W
+  flatMap: (value: W, next: (pole: Pole) => W) => W
+}
+
+move := (side: "left" | "right", birds: Birds, [left, right]: Pole): Pole =>
+  if side is "left" then [left + birds, right] else [left, right + birds]
+
+balanced := ([left, right]: Pole) => Math.abs(left - right) < 4
+
+makeLanding := <W>(M: PoleOps<W>, side: "left" | "right") =>
+  (birds: Birds) => (pole: Pole): W =>
+    next := move side, birds, pole
+    if balanced next then M.of next else M.fail next
+
+pierre := <W>(M: PoleOps<W>): W =>
+  operator bind := M.flatMap
+  pure := M.of
+  landLeft := makeLanding M, "left"
+  landRight := makeLanding M, "right"
+
+  return
+    pure([0, 0])
+      bind landLeft(1)
+      bind landRight(4)
+      bind landLeft(-1)
+      bind landRight(-2)
+
+Maybe: PoleOps<Option.Option<Pole>> :=
+  of: Option.some
+  fail: Option.none
+  flatMap: Option.flatMap
+
+Either: PoleOps<Result.Result<Pole, string>> :=
+  of: Result.succeed
+  fail: ([left, right]) => Result.fail `Pierre fell: left=${left}, right=${right}`
+  flatMap: Result.flatMap
+
+maybeLanding := pierre Maybe
+eitherLanding := pierre Either
+
+console.log "Maybe (Option):", maybeLanding
+console.log "Either (Result):", eitherLanding

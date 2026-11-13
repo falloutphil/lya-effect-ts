@@ -58,7 +58,8 @@ type PoleOps<W> = {
 // `[left, right]: Pole` unpacks the tuple, like (left, right) in Haskell.
 move := (side: "left" | "right", birds: Birds, [left, right]: Pole): Pole =>
   // Civet's if produces a value. Pole checks both branches return a pair.
-  if side === "left" then [left + birds, right] else [left, right + birds]
+  // `is` is Civet's readable spelling of JavaScript's strict equality (===).
+  if side is "left" then [left + birds, right] else [left, right + birds]
 
 // Negative birds mean birds leave. A difference of exactly four is a fall.
 // Math.abs computes the absolute difference. The inferred result is boolean.
@@ -75,9 +76,9 @@ balanced := ([left, right]: Pole) => Math.abs(left - right) < 4
 makeLanding := <W>(M: PoleOps<W>, side: "left" | "right") =>
   (birds: Birds) => (pole: Pole): W =>
     // New candidate, not an assignment to the incoming pole.
-    next := move(side, birds, pole)
+    next := move side, birds, pole
     // M chooses how to represent this decision; the balance rule stays shared.
-    if balanced(next) then M.of(next) else M.fail(next)
+    if balanced next then M.of next else M.fail next
 
 // One routine for either interpretation. `: W` checks its returned wrapper
 // agrees with the operations we received; it doesn't pick a wrapper at runtime.
@@ -85,6 +86,8 @@ pierre := <W>(M: PoleOps<W>): W =>
   // `wrapped bind next` becomes `bind(wrapped, next)`.
   // This aliases the selected flatMap; it doesn't implement a new bind.
   operator bind := M.flatMap
+  // Only bind is an infix operator. pure is called normally with one argument;
+  // combining both names in an `operator { ... }` declaration would mark both.
   // `pure`, `bind`, `Maybe`, and `Either` deliberately bridge to LYAH's names.
   // Ordinary Effect code would generally use some/succeed and flatMap directly.
   // We keep the Haskell vocabulary here to make the shared mechanism visible.
@@ -95,36 +98,39 @@ pierre := <W>(M: PoleOps<W>): W =>
 
   // Like Haskell's >>= chain. Infix operators associate to the left:
   // `a bind f bind g` becomes `bind(bind(a, f), g)`.
-  // Grouping keeps the generated implicit return expression together.
+  // An indented return block groups the chain without outer parentheses.
+  // This return is a language keyword; unlike Haskell's return, it exits the function.
+  // Keep the call parentheses on each landing: dropping them here changes
+  // how Civet groups the infix chain and its implicit function calls.
   // Both runs below use exactly these numbers, in exactly this order.
-  (pure([0, 0])
-    bind landLeft(1)
-    bind landRight(4)
-    bind landLeft(-1)
-    bind landRight(-2))
+  return
+    pure([0, 0])
+      bind landLeft(1)
+      bind landRight(4)
+      bind landLeft(-1)
+      bind landRight(-2)
 
 // A "dictionary" is an ordinary object containing functions.
 // It's an instance of PoleOps.
 // Maybe is a local constant, not a new type or an imported Haskell definition.
 // Option.Option<Pole> is the TYPE; Option.some/none/flatMap are runtime FUNCTIONS.
 // The annotation checks all three fields agree on the wrapped Pole type.
-Maybe: PoleOps<Option.Option<Pole>> := {
+// Indentation groups the fields into an object, without braces or commas.
+Maybe: PoleOps<Option.Option<Pole>> :=
   of: Option.some
-  // () => ignores the supplied failed pole, so None loses the bird counts.
-  fail: () => Option.none()
+  // none takes no arguments and ignores the supplied failed pole, losing its counts.
+  fail: Option.none
   // Some(p) calls next(p); None propagates without calling next.
   flatMap: Option.flatMap
-}
 
 // Result fills the Either role in Effect v4. The TYPE ARGUMENT ORDER differs:
 // Result<success, failure> corresponds to Haskell's Either error value.
-Either: PoleOps<Result.Result<Pole, string>> := {
+Either: PoleOps<Result.Result<Pole, string>> :=
   of: Result.succeed
   // Unpack the FAILED candidate. A backtick template string inserts ${values}.
-  fail: ([left, right]) => Result.fail(`Pierre fell: left=${left}, right=${right}`)
+  fail: ([left, right]) => Result.fail `Pierre fell: left=${left}, right=${right}`
   // Success(p) calls next(p); Failure(reason) preserves the reason and skips next.
   flatMap: Result.flatMap
-}
 
 // Implicit calls: `pierre Maybe` means `pierre(Maybe)`.
 // TypeScript infers each result from W in the supplied dictionary:

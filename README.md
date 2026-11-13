@@ -92,6 +92,7 @@ npx tsx src/optional-effect.ts
 npx tsx src/optional-standalone.ts
 npx tsx src/pierre-monad.ts
 npm run run:pierre:civet
+npm run run:pierre:less-comments
 ```
 
 Each source file also has a file-local `compile-command` header for Emacs.
@@ -105,6 +106,13 @@ This is a first Civet lesson for someone who knows a little Haskell and a little
 Effect. You do not need to know Civet beforehand. Open
 [`src/pierre.civet`](src/pierre.civet) alongside this section; the source has
 comments explaining the syntax as you encounter it.
+
+For the same program with minimal comments, open
+[`src/pierre-less-comments.civet`](src/pierre-less-comments.civet). It keeps the
+same types, operations, and landing sequence, so you can see the code's shape
+without the tutorial commentary. Run it with `npm run run:pierre:less-comments`
+or `npx civet src/pierre-less-comments.civet`. Both presentations are included
+in the normal type checks and example runner.
 
 The question comes from LYAH's [tightrope routine](https://learnyouahaskell.github.io/a-fistful-of-monads.html#walk-the-line)
 and [Either exercise](https://learnyouahaskell.github.io/for-a-few-monads-more.html#error-error-on-the-wall).
@@ -201,7 +209,8 @@ about that failure. The `_id` fields are Effect's display metadata, and `_tag`
 identifies which case of the result we have. Our routine never inspects those
 fields; `flatMap` handles success and failure for us.
 
-There are still only twelve TypeScript exercises and **one** Civet exercise.
+There are twelve TypeScript exercises and **one** Civet exercise, presented in
+both annotated and minimal-comment files.
 `npm run check`, `npm run run:examples`, and `npm test` all include it.
 
 ### Read the syntax: `:=`, `:`, `=>`, and indentation
@@ -220,7 +229,7 @@ reassigned, although that alone does not make everything it refers to immutable.
 A single colon introduces a type annotation:
 
 ```civet
-next: Pole := move(side, birds, pole)
+next: Pole := move side, birds, pole
 ```
 
 Read that as “declare the constant `next`, require its value to have type Pole,
@@ -251,7 +260,7 @@ type Birds = number
 type Pole = readonly [left: Birds, right: Birds]
 
 move := (side: "left" | "right", birds: Birds, [left, right]: Pole): Pole =>
-  if side === "left" then [left + birds, right] else [left, right + birds]
+  if side is "left" then [left + birds, right] else [left, right + birds]
 
 balanced := ([left, right]: Pole) => Math.abs(left - right) < 4
 ```
@@ -268,7 +277,8 @@ pair rather than modifying the incoming pair. The explicit return type
 `: Pole` checks that each branch returns a pair of numbers.
 
 `"left" | "right"` is a union type allowing those two string values. The
-`===` in the body compares values. Civet's `if ... then ... else ...` produces
+`is` compares values using JavaScript's strict equality (`===`) by default.
+Civet's `if ... then ... else ...` produces
 a value, just as Haskell's `if` does. So `move("left", 1, [0, 0])` returns
 `[1, 0]`. Negative numbers mean birds leave. `balanced([1, 4])` returns true;
 `balanced([0, 4])` returns false because the difference must be **less than** four.
@@ -378,17 +388,15 @@ The interface provides no automatic detection of such misuse.
 ### Supply the operations as ordinary objects
 
 ```civet
-Maybe: PoleOps<Option.Option<Pole>> := {
+Maybe: PoleOps<Option.Option<Pole>> :=
   of: Option.some
-  fail: () => Option.none()
+  fail: Option.none
   flatMap: Option.flatMap
-}
 
-Either: PoleOps<Result.Result<Pole, string>> := {
+Either: PoleOps<Result.Result<Pole, string>> :=
   of: Result.succeed
-  fail: ([left, right]) => Result.fail(`Pierre fell: left=${left}, right=${right}`)
+  fail: ([left, right]) => Result.fail `Pierre fell: left=${left}, right=${right}`
   flatMap: Result.flatMap
-}
 ```
 
 These are the runtime objects that will supply the operations. We call such an
@@ -397,14 +405,18 @@ interface. There is no special dictionary runtime: `M.of` simply looks up a
 function field on a JavaScript object.
 
 Read the first declaration in pieces: `Maybe` is the constant's name,
-`: PoleOps<Option.Option<Pole>>` is its required type, and `:= { ... }` supplies
-the object. Civet allows the fields on separate lines without commas. The
+`: PoleOps<Option.Option<Pole>>` is its required type, and the indented fields
+after `:=` supply the object. Indentation replaces the object braces here, and
+newlines separate its fields without commas. The generated TypeScript still
+contains an ordinary braced object literal. The
 annotation gives the compiler enough information to check the fields and infer
 the unannotated parameters of the functions inside them.
 
 Most fields reuse Effect functions directly. The Option failure function
-`() => Option.none()` deliberately ignores the candidate pole, so its counts
-are lost. The Result failure function unpacks that candidate and creates a
+`Option.none` expects no arguments and ignores the candidate pole supplied to
+`M.fail(next)`, so its counts are lost. TypeScript allows a function to ignore
+parameters in the required signature; a wrapping `() => Option.none()` is
+unnecessary here. The Result failure function unpacks that candidate and creates a
 message. Backticks delimit a JavaScript template string; `${left}` and
 `${right}` insert values into it.
 
@@ -418,8 +430,8 @@ rules ourselves.
 ```civet
 makeLanding := <W>(M: PoleOps<W>, side: "left" | "right") =>
   (birds: Birds) => (pole: Pole): W =>
-    next := move(side, birds, pole)
-    if balanced(next) then M.of(next) else M.fail(next)
+    next := move side, birds, pole
+    if balanced next then M.of next else M.fail next
 ```
 
 `<W>` declares this function's type parameter. `M` is a normal runtime parameter:
@@ -460,11 +472,12 @@ pierre := <W>(M: PoleOps<W>): W =>
   landLeft := makeLanding M, "left"
   landRight := makeLanding M, "right"
 
-  (pure([0, 0])
-    bind landLeft(1)
-    bind landRight(4)
-    bind landLeft(-1)
-    bind landRight(-2))
+  return
+    pure([0, 0])
+      bind landLeft(1)
+      bind landRight(4)
+      bind landLeft(-1)
+      bind landRight(-2)
 ```
 
 The function receives M once. `operator bind := M.flatMap` declares a function
@@ -472,6 +485,12 @@ alias and tells Civet that it may appear between its two arguments. Thus
 `wrapped bind landLeft(1)` means `bind(wrapped, landLeft(1))`. The name is a
 bridge to Haskell's `>>=`. It is not a special Effect operator or a call to
 Option's record-building `bind` API.
+
+Only `bind` is declared as an operator. `pure := M.of` is a separate, ordinary
+function alias, because we call it with one argument rather than between two.
+A combined `operator {flatMap: bind, of: pure} := M` declaration would make
+**both** names operators; that adds a capability we don't use, so we keep the
+separate declarations.
 
 Custom infix operators are left-associative by default. Consequently,
 `a bind f bind g` means `bind(bind(a, f), g)`. For orientation, the first two
@@ -483,12 +502,26 @@ const first = M.flatMap(start, landLeft(1));
 const second = M.flatMap(first, landRight(4));
 ```
 
-The full generated expression nests four such calls. The grouping parentheses
-around the Civet chain keep its implicit return together. With the installed
-compiler, leaving this multiline expression ungrouped generated a bare `return`
-followed by a newline and returned `undefined`. The grouped form in the source
-has been compiled, type-checked, and executed. You can inspect it with the
-compile command above. The official [infix operator reference](https://civet.dev/reference#functions-as-infix-operators)
+The full generated expression nests four such calls. The explicit `return`
+followed by an indented block groups the whole chain, so we do not need outer
+parentheses in the Civet source. This `return` is the language keyword that
+returns from a function; Haskell's `return` instead corresponds to our success
+constructor `pure`.
+
+With the installed compiler, a bare multiline infix expression in an implicit
+return generated a `return` followed by a newline and returned `undefined`.
+An indented `return` block makes Civet generate the grouping parentheses in
+TypeScript for us. The source form above has been compiled, type-checked, and
+executed. You can inspect it with the compile command above.
+
+Outside the infix chain, we omit call parentheses where the grouping is clear:
+`move side, birds, pole` calls `move(side, birds, pole)`, and `M.of next` calls
+`M.of(next)`. Inside the chain, keep `bind landLeft(1)` and the corresponding
+landing calls as written. Removing those call parentheses changes how Civet
+groups the implicit calls and infix operators. Fewer parentheses help only when
+the compiled expression still means the same thing.
+
+The official [infix operator reference](https://civet.dev/reference#functions-as-infix-operators)
 describes how the function calls and associativity work.
 
 ### Choose once, then follow both runs

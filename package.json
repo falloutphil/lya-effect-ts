@@ -4,9 +4,10 @@
   "main": "index.js",
   "scripts": {
     "check": "tsc --noEmit && npm run check:civet",
-    "check:civet": "civet --typecheck src/pierre.civet",
-    "run:examples": "set -e; for f in src/*.ts; do echo \"RUN:$f\"; node --import tsx \"$f\"; done; npm run run:pierre:civet",
+    "check:civet": "civet --typecheck src/*.civet",
+    "run:examples": "set -e; for f in src/*.ts; do echo \"RUN:$f\"; node --import tsx \"$f\"; done; npm run run:pierre:civet; npm run run:pierre:less-comments",
     "run:pierre:civet": "node --import @danielx/civet/register src/pierre.civet",
+    "run:pierre:less-comments": "node --import @danielx/civet/register src/pierre-less-comments.civet",
     "test": "npm run check && npm run run:examples",
     "prepare": "effect-language-service patch"
   },
