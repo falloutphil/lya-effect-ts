@@ -1,49 +1,129 @@
 // -*- compile-command: "npm --prefix .. run run:pierre:civet" -*-
-// One routine, first with Maybe (Option), then Either (Result). See the README.
+// A first Civet example for readers who know a little Haskell.
+// Run from the repo root: npm run run:pierre:civet
+// Read the README's Civet tutorial alongside this file.
+//
+// Our aim: write the landings and their sequencing once, then choose whether
+// failure means Nothing (Option.none) or Left with a reason (Result.fail).
+// Civet compiles the syntax; Effect v4 provides the values and flatMap.
 import { Option, Result } from "effect"
 
+// `type` names a TypeScript type. It creates no runtime object.
+// Birds is another name for number, not a distinct validated numeric type.
 type Birds = number
+
+// A tuple has fixed positions: [left count, right count]. The labels help
+// readers and editors; they are not object properties like pole.left.
+// `readonly` prevents mutation through a Pole reference. It does not freeze
+// the array at runtime. Haskell's (Birds, Birds) is the closest analogue.
 type Pole = readonly [left: Birds, right: Birds]
 
-// W is the wrapped Pole. The routine never needs to inspect that wrapper.
+// W is a type parameter: the WHOLE wrapped result, not the value inside it.
+// In this file it will be either:
+//   W = Option.Option<Pole>          (Haskell: Maybe Pole)
+//   W = Result.Result<Pole, string>  (Haskell: Either String Pole)
+// Pole itself is not generic: there is no Pole<W> here.
+// PoleOps<W> means "the operations that agree on this choice of W".
+//
+// These fields are FUNCTION TYPES. `: (pole: Pole) => W` describes a function;
+// it does not call one. The actual functions are supplied in objects below.
 type PoleOps<W> = {
+  // Wrap a successful Pole. Similar to Haskell's pure, specialised to Pole.
   of: (pole: Pole) => W
+  // Represent a failed candidate Pole, retaining or discarding its counts.
+  // Our own operation name, not Haskell's MonadFail.fail.
   fail: (pole: Pole) => W
+  // `next` receives an ordinary Pole and returns the SAME choice of W.
+  // flatMap decides whether that continuation gets called.
   flatMap: (value: W, next: (pole: Pole) => W) => W
 }
 
-makeLanding := <W>(M: PoleOps<W>, side: "left" | "right") =>
-  (birds: Birds) => ([left, right]: Pole): W =>
-    next: Pole := if side === "left" then [left + birds, right] else [left, right + birds]
-    if Math.abs(next[0] - next[1]) < 4 then M.of(next) else M.fail(next)
+// Pure domain calculation: no Option, Result, or failure handling here.
+// `name := expression` means `const name = expression` in TypeScript.
+// `(args): ReturnType => body` creates a function. Indentation groups its body;
+// the final expression is returned implicitly, as in a Haskell function body.
+// "left" | "right" allows exactly those two string values.
+// `[left, right]: Pole` unpacks the tuple, like (left, right) in Haskell.
+move := (side: "left" | "right", birds: Birds, [left, right]: Pole): Pole =>
+  // Civet's if produces a value. Pole checks both branches return a pair.
+  if side === "left" then [left + birds, right] else [left, right + birds]
 
+// Negative birds mean birds leave. A difference of exactly four is a fall.
+// Math.abs computes the absolute difference. The inferred result is boolean.
+balanced := ([left, right]: Pole) => Math.abs(left - right) < 4
+
+// <W> introduces a type parameter; M is the runtime object containing its ops.
+// The compiler tracks W. The object M supplies actual functions when we run.
+// This function is curried in stages:
+//   makeLanding(M, "left") -> a function waiting for the number of birds
+//   landLeft(1)            -> a function waiting for the previous Pole
+//   landLeft(1)([0, 0])    -> W (Some/Success [1, 0], for these interpreters)
+// Unlike Haskell, Civet doesn't automatically curry multi-argument functions.
+// The successive => arrows explicitly build the successive functions.
+makeLanding := <W>(M: PoleOps<W>, side: "left" | "right") =>
+  (birds: Birds) => (pole: Pole): W =>
+    // New candidate, not an assignment to the incoming pole.
+    next := move(side, birds, pole)
+    // M chooses how to represent this decision; the balance rule stays shared.
+    if balanced(next) then M.of(next) else M.fail(next)
+
+// One routine for either interpretation. `: W` checks its returned wrapper
+// agrees with the operations we received; it doesn't pick a wrapper at runtime.
 pierre := <W>(M: PoleOps<W>): W =>
+  // `wrapped bind next` becomes `bind(wrapped, next)`.
+  // This aliases the selected flatMap; it doesn't implement a new bind.
   operator bind := M.flatMap
+  // `pure`, `bind`, `Maybe`, and `Either` deliberately bridge to LYAH's names.
+  // Ordinary Effect code would generally use some/succeed and flatMap directly.
+  // We keep the Haskell vocabulary here to make the shared mechanism visible.
   pure := M.of
+  // Implicit calls: `makeLanding M, "left"` means `makeLanding(M, "left")`.
   landLeft := makeLanding M, "left"
   landRight := makeLanding M, "right"
 
+  // Like Haskell's >>= chain. Infix operators associate to the left:
+  // `a bind f bind g` becomes `bind(bind(a, f), g)`.
+  // Grouping keeps the generated implicit return expression together.
+  // Both runs below use exactly these numbers, in exactly this order.
   (pure([0, 0])
     bind landLeft(1)
     bind landRight(4)
     bind landLeft(-1)
     bind landRight(-2))
 
-// The interpreter changes; the routine and all its inputs stay the same.
+// A "dictionary" is an ordinary object containing functions.
+// Maybe is a local constant, not a new type or an imported Haskell definition.
+// Option.Option<Pole> is the TYPE; Option.some/none/flatMap are runtime FUNCTIONS.
+// The annotation checks all three fields agree on the wrapped Pole type.
 Maybe: PoleOps<Option.Option<Pole>> := {
   of: Option.some
+  // () => ignores the supplied failed pole, so None loses the bird counts.
   fail: () => Option.none()
+  // Some(p) calls next(p); None propagates without calling next.
   flatMap: Option.flatMap
 }
 
+// Result fills the Either role in Effect v4. The TYPE ARGUMENT ORDER differs:
+// Result<success, failure> corresponds to Haskell's Either error value.
 Either: PoleOps<Result.Result<Pole, string>> := {
   of: Result.succeed
+  // Unpack the FAILED candidate. A backtick template string inserts ${values}.
   fail: ([left, right]) => Result.fail(`Pierre fell: left=${left}, right=${right}`)
+  // Success(p) calls next(p); Failure(reason) preserves the reason and skips next.
   flatMap: Result.flatMap
 }
 
-maybeLanding: Option.Option<Pole> := pierre Maybe
-eitherLanding: Result.Result<Pole, string> := pierre Either
+// Implicit calls: `pierre Maybe` means `pierre(Maybe)`.
+// TypeScript infers each result from W in the supplied dictionary:
+//   maybeLanding:  Option.Option<Pole>
+//   eitherLanding: Result.Result<Pole, string>
+// Choose an interpreter once; the routine and its inputs stay unchanged.
+maybeLanding := pierre Maybe
+eitherLanding := pierre Either
 
+// Both runs are eager. These are ordinary Option/Result values from the Effect
+// package, not Effect computations needing Effect.run*. console.log displays them.
+// Trace: [0,0] -> [1,0] -> [1,4] -> attempt [0,4] -> failure.
+// The last landRight(-2) callback is skipped. It cannot rescue a fallen Pierre.
 console.log "Maybe (Option):", maybeLanding
 console.log "Either (Result):", eitherLanding
