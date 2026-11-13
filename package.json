@@ -4,8 +4,8 @@
   "main": "index.js",
   "scripts": {
     "check": "tsc --noEmit",
-    "run:examples": "for f in src/*.ts; do echo \"RUN:$f\"; tsx \"$f\"; done",
-    "test": "npm run check",
+    "run:examples": "set -e; for f in src/*.ts; do echo \"RUN:$f\"; node --import tsx \"$f\"; done",
+    "test": "npm run check && npm run run:examples",
     "prepare": "effect-language-service patch"
   },
   "repository": {
@@ -20,15 +20,13 @@
   },
   "homepage": "https://github.com/falloutphil/lya-effect-ts#readme",
   "devDependencies": {
-    "@effect/language-service": "^0.86.2",
+    "@effect/language-service": "^0.87.5",
     "@types/node": "^22.15.21",
     "tsx": "^4.20.6",
     "typescript": "^5.8.3"
   },
   "dependencies": {
-    "@effect/data": "^0.18.7",
-    "@effect/typeclass": "^0.40.0",
-    "effect": "^3.21.2"
+    "effect": "4.1.4"
   },
   "description": ""
 }

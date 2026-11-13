@@ -1,19 +1,14 @@
 // -*- compile-command: "npx tsx monoid-flatten-array.ts" -*-
 
 import { pipe } from "effect/Function";
-import { getMonoid } from "@effect/typeclass/data/Array"; // Importing array-specific Monoid instance
+import * as Array from "effect/Array";
 
-// Flatten an array of arrays using the array Monoid
-// This function uses the array Monoid to concatenate nested arrays into a single readonly array
+// Reducer is v4's monoid-shaped interface: combine + initialValue + combineAll.
+// This combines whole arrays by concatenation, not the numbers/strings inside.
 function flattened<A>(array: ReadonlyArray<ReadonlyArray<A>>): ReadonlyArray<A> {
-  // Use pipe to pass the array through combineAll with the array monoid
-  // The Monoid instance for arrays knows how to concatenate them, with the empty array as the identity
-  // The important point here is that getMonoid comes from Array's typeclass NOT A's typeclass
-  // So it produces a monoid to combine **Arrays** containing elements of type A, rather than combining
-  // elements of type A.
-  // It's nice because Typescripts type system is good enough so you can simply pass it the
-  // it the array of arrays without having to explicitly says what A is (see below)
-  return pipe(array, getMonoid<A>().combineAll);
+  // The native reducer accepts mutable inner arrays. Copy readonly inputs at
+  // the boundary; the caller's arrays stay unchanged.
+  return pipe(array, Array.map(Array.fromIterable), Array.makeReducerConcat<A>().combineAll);
 }
 
 // Usage examples:

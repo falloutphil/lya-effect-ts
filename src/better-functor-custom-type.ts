@@ -1,8 +1,8 @@
 // -*- compile-command: "npx tsx better-functor-custom-type.ts" -*-
 
 import { dual, pipe } from "effect/Function";
-import * as A from "@effect/typeclass/data/Array"; // Importing Covariant instance for arrays
-import type { Covariant as CovariantType } from "@effect/typeclass/Covariant";
+import { ArrayInstances as A } from "./teaching/instances"; // Our v4 teaching dictionary for arrays
+import type { Covariant as CovariantType } from "./teaching/typeclasses";
 import type { Kind, TypeLambda } from "effect/HKT";
 
 // Define the custom HKT X

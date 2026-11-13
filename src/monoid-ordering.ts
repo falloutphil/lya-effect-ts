@@ -1,6 +1,6 @@
 // -*- compile-command: "npx tsx monoid-ordering.ts" -*-
 
-import { combineAll, Ordering } from "effect/Ordering"; // Importing combineAll for combining orderings
+import { Reducer, type Ordering } from "effect/Ordering"; // First nonzero comparison wins
 import * as Ord from "effect/Order"; // Importing all Order instances and utilities from Order module
 
 // Order is a monoid which you can think of as comparing
@@ -24,17 +24,17 @@ const countVowels = (s: string): number =>
 
 // Order instance for comparing strings by their length
 // mapInput is similar to, but a more narrow Order-specific use-case of contramap in fp-ts
-const ordLength = Ord.mapInput((s: string) => s.length)(Ord.number);
+const ordLength = Ord.mapInput((s: string) => s.length)(Ord.Number);
 
 // Order instance for comparing strings by their number of vowels
-const ordVowels = Ord.mapInput((s: string) => countVowels(s))(Ord.number);
+const ordVowels = Ord.mapInput((s: string) => countVowels(s))(Ord.Number);
 
 // Combined comparison function using combineAll
 const lengthCompare = (x: string, y: string): Ordering => 
-  combineAll([
+  Reducer.combineAll([
     ordLength(x, y),  // Compare by length
     ordVowels(x, y),  // Compare by number of vowels
-    Ord.string(x, y)  // Compare standard - lexicographically
+    Ord.String(x, y)  // Compare standard - lexicographically
   ]);
 
 // Testing the lengthCompare function

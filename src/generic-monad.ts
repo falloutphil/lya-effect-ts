@@ -1,10 +1,8 @@
 // -*- compile-command: "npx tsx generic-monad.ts" -*-
 
-import { pipe } from "@effect/data/Function";
-import * as O from "@effect/typeclass/data/Option"; // Option Monad
-import * as E from "@effect/typeclass/data/Either"; // Either Monad
-import * as A from "@effect/typeclass/data/Array";  // Array Monad
-import { Monad } from "@effect/typeclass/Monad";    // Monad interface
+import { pipe } from "effect/Function";
+import { OptionInstances as O, ResultInstances as R, ArrayInstances as A } from "./teaching/instances";
+import type { Monad } from "./teaching/typeclasses";
 import type { TypeLambda, Kind } from "effect/HKT";
 
 // Type alias for data points (in this case, numbers)
@@ -58,10 +56,10 @@ console.log("----- Option Monad -----");
 const resultOption = monadicChain(O.Monad);
 console.log(resultOption); // Expected: Some(35)
 
-// Either Monad: Chain of transformations using Either
-console.log("----- Either Monad -----");
-const resultEither = monadicChain(E.Monad);
-console.log(resultEither); // Expected: Right(35)
+// Result Monad: v4 replaces Either.Right with Result.Success
+console.log("----- Result Monad -----");
+const resultResult = monadicChain(R.Monad);
+console.log(resultResult); // Expected: Success(35)
 
 // Array Monad: Chain of transformations using Array
 console.log("----- Array Monad -----");

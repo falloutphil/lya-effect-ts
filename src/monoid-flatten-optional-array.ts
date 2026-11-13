@@ -1,23 +1,20 @@
 // -*- compile-command: "npx tsx monoid-flatten-optional-array.ts" -*-
 
-import { pipe } from "effect/Function"; // Importing the pipe function for functional composition
-import * as Option from "effect/Option"; // Importing Option type and utility functions
-import { getMonoid as getArrayMonoid } from "@effect/typeclass/data/Array"; // Importing array-specific Monoid instance
-import { getOptionalMonoid } from "@effect/typeclass/data/Option"; // Importing the function to create Monoid for Option
+import { pipe } from "effect/Function";
+import * as Array from "effect/Array";
+import * as Option from "effect/Option";
 
-// Define a function to flatten an Array of Option<Array<A>>
-// This function uses Monoid instances to combine nested Options and Arrays into a single Option containing a flattened array.
+// Lift array concatenation into an optional context, with None as identity.
 function flattenedOption<A>(options: ReadonlyArray<Option.Option<ReadonlyArray<A>>>): Option.Option<ReadonlyArray<A>> {
-  // Create a monoid for arrays of type A using the array Monoid instance
-  const arrayMonoid = getArrayMonoid<A>();
-
-  // Create a Monoid for Option<Array<A>> using getOptionalMonoid
-  // This function lifts the array monoid into the Option context
-  const optionMonoid = getOptionalMonoid(arrayMonoid);
-
-  // Use pipe to pass the array of options through combineAll with the option monoid
-  // This effectively flattens the nested structure, combining all inner arrays and handling None values appropriately
-  return pipe(options, optionMonoid.combineAll);
+  const arrayReducer = Array.makeReducerConcat<A>();
+  // Some + None keeps the Some; two Somes concatenate; all None stays None.
+  // This differs from makeReducerFailFast, where any None loses the result.
+  const optionReducer = Option.makeReducer(arrayReducer);
+  return pipe(
+    options,
+    Array.map(Option.map(Array.fromIterable)),
+    optionReducer.combineAll
+  );
 }
 
 // Usage examples:

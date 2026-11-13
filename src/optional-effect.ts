@@ -4,11 +4,10 @@
 // https://github.com/falloutphil/fp-ts-doodling/blob/main/Optional-use-fp.ts
 
 import * as Option from "effect/Option";
-import * as O from "@effect/typeclass/data/Option";
-import * as A from "@effect/typeclass/data/Array"
-import * as N  from "@effect/typeclass/data/Number";
-import * as SA from "@effect/typeclass/SemiApplicative";
-import type { Covariant } from "@effect/typeclass/Covariant";
+import { OptionInstances as O, ArrayInstances as A } from "./teaching/instances";
+import * as N  from "effect/Number";
+import * as SA from "./teaching/typeclasses";
+import type { Covariant } from "./teaching/typeclasses";
 import type { Kind, TypeLambda } from "effect/HKT";
 
 // Generic increment function using the generic Covariant interface
@@ -56,16 +55,16 @@ console.log(liftedArray); // Output: [2, 4, 6, 8]
 const liftedNone = lift(O.Covariant, Option.none(), (x: number) => x + 5);
 console.log(liftedNone); // Output: None
 
-// Lift the Semigroup into the Option context using SemiApplicative's getSemigroup
-// getSemigroup combines Option values using a Semigroup operation,
+// Lift the Semigroup into the Option context using SemiApplicative's getCombiner
+// getCombiner combines Option values using a Semigroup operation,
 // which is a common alternative to using map in certain contexts.
 
-// getSemigroup leverages O.SemiApplicative to create a semigroup for Option<number>
-// by lifting the semigroup operation of Number (SemigroupSum) into the Option context.
-// Essentially, it combines the capabilities of O.SemiApplicative and SemigroupSum to define how
-// Some values are combined (+ via SemigroupSum) and how None values are managed
+// getCombiner leverages O.SemiApplicative to create a semigroup for Option<number>
+// by lifting the semigroup operation of Number (ReducerSum) into the Option context.
+// Essentially, it combines the capabilities of O.SemiApplicative and ReducerSum to define how
+// Some values are combined (+ via ReducerSum) and how None values are managed
 // (i.e., None short-circuits the operation).
-const optionSemigroup = SA.getSemigroup(O.SemiApplicative)(N.SemigroupSum);
+const optionSemigroup = SA.getCombiner(O.SemiApplicative)(N.ReducerSum);
 
 // Combine Option values using the lifted Semigroup
 // This semigroup allows us to combine two Option values where both need to be Some for a result
@@ -76,12 +75,12 @@ const combinedWithNone = optionSemigroup.combine(Option.some(2), Option.none());
 console.log(combined); // Output: Some(5)
 console.log(combinedWithNone); // Output: None
 
-// Use lift2 to lift the SemigroupSum's combine operation into the Option context
-// lift2 allows us to lift a binary function, like SemigroupSum.combine, to operate within the context of Options.
+// Use lift2 to lift the ReducerSum's combine operation into the Option context
+// lift2 allows us to lift a binary function, like ReducerSum.combine, to operate within the context of Options.
 // This is analogous to combining two Options using a lifted version of the Semigroup's combine operation.
 // Obviously, this doesn't create a new semigroup; it's just lifting the combine function as if
 // it was any other function.
-const combineWithLift2 = SA.lift2(O.SemiApplicative)(N.SemigroupSum.combine);
+const combineWithLift2 = SA.lift2(O.SemiApplicative)(N.ReducerSum.combine);
 
 // Apply the lifted function to Option values
 // As with the semigroup example, both Options must be Option.Some for a successful combination.

@@ -1,9 +1,8 @@
 // -*- compile-command: "npx tsx basic-custom-monad.ts" -*-
 
 import { pipe, dual } from "effect/Function";
-import type { Covariant as CovariantType } from "@effect/typeclass/Covariant";
-import { Monad as MonadType } from "@effect/typeclass/Monad";
-import { flatten, zipRight, composeK } from "@effect/typeclass/FlatMap";
+import type { Covariant as CovariantType, Monad as MonadType } from "./teaching/typeclasses";
+import { flatten, zipRight, composeK } from "./teaching/typeclasses";
 import type { Kind, TypeLambda } from "effect/HKT";
 
 // Define the custom and trivial HKT X

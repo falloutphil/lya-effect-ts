@@ -1,0 +1,14 @@
+{
+  "applicative.ts": [["----- Trivial Monoids  -----"], [10], [[10]], ["----- Option Add -----"], [{"_tag": "Some", "value": 8}], [{"_tag": "Some", "value": 8}], ["----- Option Concat -----"], [{"_tag": "Some", "value": "FooBar"}], [{"_tag": "Some", "value": "FooBar"}], ["----- Array Add 2 -----"], [[8]], [[8]], ["----- Array Add 3 -----"], [[6]], [[6]], ["----- Option Add 3 -----"], [{"_tag": "Some", "value": 12}], [{"_tag": "Some", "value": 12}], ["----- Option Add 4 -----"], [{"_tag": "Some", "value": 20}], [{"_tag": "Some", "value": 20}], ["----- Option Concat 4 -----"], [{"_tag": "Some", "value": "OneTwoThreeFour"}], [{"_tag": "Some", "value": "OneTwoThreeFour"}]],
+  "basic-custom-monad.ts": [[{"x": "4!"}], [{"x": 42}], [{"x": "Second!"}], [{"x": 8}]],
+  "better-functor-custom-type.ts": [[{"x": "4!"}], [["2!", "4!", "6!"]]],
+  "curry.ts": [["add2Result: 8"], ["add3Result: 6"], ["add4Result: 10"]],
+  "effect-do-notation.ts": [[{"_tag": "Some", "value": "3!"}], [{"_tag": "Some", "value": "3!"}], [{"_tag": "Some", "value": {"x": 2, "y": 3, "sum": 5}}]],
+  "generic-monad.ts": [["----- Option Monad -----"], [{"_tag": "Some", "value": 35}], ["----- Result Monad -----"], [{"_tag": "Success", "value": 35}], ["----- Array Monad -----"], [[35]]],
+  "monoid-flatten-array.ts": [[[1, 2, 4, 5]], [["foo", "bar", "baz"]]],
+  "monoid-flatten-optional-array.ts": [[{"_tag": "Some", "value": [1, 2, 3, 4]}], [{"_tag": "Some", "value": ["foo", "bar", "baz"]}], [{"_tag": "None"}]],
+  "monoid-ordering.ts": [[-1], [1], [-1], [-1], [1]],
+  "optional-effect.ts": [[{"_tag": "Some", "value": 6}], [[2, 3, 4, 5]], [{"_tag": "Some", "value": 10}], [[2, 4, 6, 8]], [{"_tag": "None"}], [{"_tag": "Some", "value": 5}], [{"_tag": "None"}], [{"_tag": "Some", "value": 5}]],
+  "optional-standalone.ts": [[{"_tag": "Some", "value": 6}], [{"_tag": "None"}], [{"_tag": "Some", "value": 6}], [{"_tag": "Some", "value": 10}]],
+  "pierre-monad.ts": [["landingSequenceFlatMap:", {"_tag": "None"}], ["landingSequenceDo:     ", {"_tag": "None"}], ["landingSequenceGen:    ", {"_tag": "None"}], ["failedLandingFlatMap:  ", {"_tag": "None"}], ["failedLandingDo:       ", {"_tag": "None"}], ["failedLandingGen:      ", {"_tag": "None"}]]
+}

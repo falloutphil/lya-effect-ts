@@ -1,19 +1,18 @@
 // -*- compile-command: "npx tsx applicative.ts" -*-
 
-import * as O from "@effect/typeclass/data/Option";
-import * as A from "@effect/typeclass/data/Array";
-import * as SA from "@effect/typeclass/SemiApplicative";
-import type { Applicative } from "@effect/typeclass/Applicative";
+import { OptionInstances as O, ArrayInstances as A } from "./teaching/instances";
+import * as SA from "./teaching/typeclasses";
+import type { Applicative } from "./teaching/typeclasses";
 import type { TypeLambda, Kind } from "effect/HKT";
 import * as Option from "effect/Option";
 import {pipe} from "effect/Function";
-import { Monoid as MonoidString } from "@effect/typeclass/data/String";
-import { MonoidSum } from "@effect/typeclass/data/Number";
-import { Monoid } from "@effect/typeclass/Monoid"; // Import the Monoid interface
+import { ReducerConcat } from "effect/String";
+import { ReducerSum } from "effect/Number";
+import type { Reducer } from "effect/Reducer"; // V4 name for the monoid-shaped contract
 
 // Function to convert a variadic function into a fixed-arity function using explicit lambdas
 // This is required before we can use curryN
-// If the arity doesn't match any function, Option.fromNullable returns Option.none.
+// If the arity doesn't match any function, Option.fromNullishOr returns Option.none.
 // * Rest parameters (...args) always explicitly collect arguments into an array.
 // * Named parameters (a1, a2, a3) implicitly allow you to pass arguments individually,
 //   BUT you can use spread syntax to pass them as an array too.
@@ -24,7 +23,7 @@ const handleVariadicFunction = <T>(
   fn: (...args: T[]) => T,
   arity: number
 ) =>
-  Option.fromNullable([
+  Option.fromNullishOr([
     (a: T) => fn(a),
     (a: T, b: T) => fn(a, b),
     (a: T, b: T, c: T) => fn(a, b, c),
@@ -110,21 +109,21 @@ const concat_spread = (...args: string[]): string => args.reduce((acc, val) => a
 // asynchronous behavior) that applicatives are designed to handle, and thus, conceptually and practically,
 // they are not identical in the context of demonstrating applicative behavior.
 // So think of this as a demonstration of how we can weave monoidal properties into an applicative context!
-const monoid_spread = <T>
-  (monoid: Monoid<T>) =>
+const reducer_spread = <T>
+  (reducer: Reducer<T>) =>
   (...args: T[]) => {
-  return monoid.combineAll(args);
+  return reducer.combineAll(args);
 }
 
 
 console.log("----- Trivial Monoids  -----"); 
 
 // Trivial example without applicative context
-const numberSumResult = monoid_spread(MonoidSum)(1, 2, 3, 4); // Expected: 10
+const numberSumResult = reducer_spread(ReducerSum)(1, 2, 3, 4); // Expected: 10
 console.log(numberSumResult);
 
 // Same procedure lifted into applicative context
-const resultMonoid = applyFn(A.Applicative, monoid_spread(MonoidSum), 1, 2, 3, 4);
+const resultMonoid = applyFn(A.Applicative, reducer_spread(ReducerSum), 1, 2, 3, 4);
 console.log(Option.getOrNull(resultMonoid));
 
 console.log("----- Option Add -----");
@@ -132,7 +131,7 @@ console.log("----- Option Add -----");
 const resultOption = applyFn(O.Applicative, add, 3, 5);
 console.log(Option.getOrNull(resultOption)); // Expected: some(8)
 
-const resultOptionMonoid = applyFn(O.Applicative, monoid_spread(MonoidSum), 3, 5);
+const resultOptionMonoid = applyFn(O.Applicative, reducer_spread(ReducerSum), 3, 5);
 console.log(Option.getOrNull(resultOptionMonoid)); // Expected: some(8)
 
 console.log("----- Option Concat -----");
@@ -140,7 +139,7 @@ console.log("----- Option Concat -----");
 const resultOption2 = applyFn(O.Applicative, concat, 'Foo', 'Bar');
 console.log(Option.getOrNull(resultOption2)); // Expected: some("FooBar")
 
-const resultOption2Monoid = applyFn(O.Applicative, monoid_spread(MonoidString), 'Foo', 'Bar');
+const resultOption2Monoid = applyFn(O.Applicative, reducer_spread(ReducerConcat), 'Foo', 'Bar');
 console.log(Option.getOrNull(resultOption2Monoid)); // Expected: some("FooBar")
 
 console.log("----- Array Add 2 -----");
@@ -148,7 +147,7 @@ console.log("----- Array Add 2 -----");
 const resultArray = applyFn(A.Applicative, add, 3, 5);
 console.log(Option.getOrNull(resultArray)); // Expected: [8]
 
-const resultArrayMonoid = applyFn(A.Applicative, monoid_spread(MonoidSum), 3, 5);
+const resultArrayMonoid = applyFn(A.Applicative, reducer_spread(ReducerSum), 3, 5);
 console.log(Option.getOrNull(resultArrayMonoid)); // Expected: some(8)
 
 console.log("----- Array Add 3 -----");
@@ -156,23 +155,23 @@ console.log("----- Array Add 3 -----");
 const resultArray3 = applyFn(A.Applicative, add_spread, 1, 2, 3);
 console.log(Option.getOrNull(resultArray3)); // Expected: [6]
 
-const resultArray3Monoid = applyFn(A.Applicative, monoid_spread(MonoidSum), 1, 2, 3);
+const resultArray3Monoid = applyFn(A.Applicative, reducer_spread(ReducerSum), 1, 2, 3);
 console.log(Option.getOrNull(resultArray3Monoid)); // Expected: [6]
 
 console.log("----- Option Add 3 -----");
 
 const resultOption3 = applyFn(O.Applicative, add3, 2, 4, 6);
-console.log(Option.getOrNull(resultOption3)); // Expected some(20)
+console.log(Option.getOrNull(resultOption3)); // Expected some(12)
 
-const resultOption3Monoid = applyFn(O.Applicative, monoid_spread(MonoidSum), 2, 4, 6);
-console.log(Option.getOrNull(resultOption3Monoid)); // Expected some(20)
+const resultOption3Monoid = applyFn(O.Applicative, reducer_spread(ReducerSum), 2, 4, 6);
+console.log(Option.getOrNull(resultOption3Monoid)); // Expected some(12)
 
 console.log("----- Option Add 4 -----");
 
 const resultOption4 = applyFn(O.Applicative, add_spread, 2, 4, 6, 8);
 console.log(Option.getOrNull(resultOption4)); // Expected some(20)
 
-const resultOption4Monoid = applyFn(O.Applicative, monoid_spread(MonoidSum), 2, 4, 6, 8);
+const resultOption4Monoid = applyFn(O.Applicative, reducer_spread(ReducerSum), 2, 4, 6, 8);
 console.log(Option.getOrNull(resultOption4Monoid)); // Expected some(20)
 
 console.log("----- Option Concat 4 -----");
@@ -180,5 +179,5 @@ console.log("----- Option Concat 4 -----");
 const resultOption5 = applyFn(O.Applicative, concat_spread, "One", "Two", "Three", "Four");
 console.log(Option.getOrNull(resultOption5)); // Expected some(OneTwoThreeFour)
 
-const resultOption5Option = applyFn(O.Applicative, monoid_spread(MonoidString), "One", "Two", "Three", "Four");
+const resultOption5Option = applyFn(O.Applicative, reducer_spread(ReducerConcat), "One", "Two", "Three", "Four");
 console.log(Option.getOrNull(resultOption5Option)); // Expected some(OneTwoThreeFour)

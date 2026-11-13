@@ -14,9 +14,20 @@ few specific ideas:
 - generic typeclass-style abstractions
 - small custom functor / monad examples
 
+The runnable examples use **Effect 4.1.4**, pinned in `package.json`. Effect v4
+retains HKT but removes the `@effect/typeclass` package. This repo defines the
+small set of generic teaching interfaces it needs in
+[`src/teaching/typeclasses.ts`](src/teaching/typeclasses.ts), with v4 instances in
+[`src/teaching/instances.ts`](src/teaching/instances.ts). These are local teaching
+definitions, not an official v4 typeclass library.
+
+Read [the v3 → v4 migration notes](notes/effect-v4-migration.md) for old/new code,
+the techniques we preserved, the two meanings of optional combination, and the
+observed results of every script.
+
 ## Requirements
 
-- Node.js
+- Node.js 24 (used for the migration checks)
 - npm
 
 ## Setup
@@ -26,6 +37,8 @@ From the repo root:
 ```bash
 npm install
 ```
+
+For an install using exactly the committed lockfile, use `npm ci`.
 
 ## Check The Repo
 
@@ -40,6 +53,16 @@ This runs:
 ```bash
 tsc --noEmit
 ```
+
+Type-check and run every example together:
+
+```bash
+npm test
+```
+
+The examples themselves are the exercises and checks; there is no separate unit
+test suite. The runner stops if any script fails. Compare the printed values
+with the [recorded results](notes/effect-v4-migration.md#verification-and-observed-results).
 
 ## Run Every Example
 
@@ -91,7 +114,7 @@ order.
    `map`, lifting, and applicative-style composition over `Option`.
 
 5. `src/generic-monad.ts`
-   The same general idea across `Option`, `Either`, and `Array`.
+   The same general idea across `Option`, `Result` (v3's `Either`), and `Array`.
 
 6. `src/basic-custom-monad.ts`
    Small custom monad example.
